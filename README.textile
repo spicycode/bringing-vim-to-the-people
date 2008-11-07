@@ -1,0 +1,14 @@
+h1. Bringing VIM to the People
+
+h3. What's included?
+
+* IRB 
+* Shell Mode with Syntax Highlighting for running test results
+* GUI+Terminal theme (spicycode) with nearest match color palletes
+* FuzzyFinder built-in and setup with reasonable defaults
+* User Settings file for user specific bits
+
+h3. How do I use it?
+
+* Clone the repo, or fork it if you want, then symlink .vimrc, .gvimrc, and .vim to your $HOME directory.  
+* Copy the ~/.vim/example_user_settings.vim to ~/.vim/user_settings.vim and customize as necessary.
