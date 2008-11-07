@@ -12,3 +12,4 @@ h3. How do I use it?
 
 * Clone the repo, or fork it if you want, then symlink .vimrc, .gvimrc, and .vim to your $HOME directory.  
 * Copy the ~/.vim/example_user_settings.vim to ~/.vim/user_settings.vim and customize as necessary.
+* Best used with MacVim
