@@ -74,6 +74,7 @@ hi VertSplit            guifg=#666666 guibg=#eaeaea
 hi LineNr				guifg=#666666 guibg=#eaeaea
 hi ModeMsg              gui=bold
 hi Normal               guifg=#000000 guibg=#ffffff
+hi Pmenu                guibg=#babdb6 guifg=#555753
 hi StatusLine           guifg=#666666 guibg=#eaeaea
 hi Visual               guifg=NONE guibg=#ffffcc
 
