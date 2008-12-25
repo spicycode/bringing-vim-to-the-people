@@ -1,10 +1,13 @@
   scriptencoding utf-8
 
+  " Change <Leader>
+  let mapleader = ","
+
 " Set temporary directory (don't litter local dir with swp/tmp files)
   set directory=/tmp/
 
-" Set grep to ack
-  set grepprg=ack\ --noenv\ -a
+" When scrolling off-screen do so 3 lines at a time, not 1
+  set scrolloff=3
 
 " These two enable syntax highlighting
   set nocompatible
@@ -23,7 +26,7 @@
   
 " Use the tab complete menu
   set wildmenu 
-  set wildmode=list:longest,full
+  set wildmode=list:longest
 
 " have the mouse enabled all the time:
   set mouse=a
@@ -83,7 +86,6 @@
   :nmap ,te :tabedit  
 
 " SHELL
-
   command! -complete=file -nargs=+ Shell call s:RunShellCommand(<q-args>)
 
   function! s:RunShellCommand(cmdline)
@@ -104,7 +106,6 @@
     1
   endfunction
 
-
   :nmap ,sh :Shell 
 
 " find file in project
@@ -124,7 +125,6 @@
   set statusline+=[
   set statusline+=%{strlen(&ft)?&ft:'none'}, " filetype
   set statusline+=%{&fileformat}] " file format
-
   set statusline+=%h%1*%m%r%w%0* " flag
   set statusline+=%= " right align
   set statusline+=%-14.(%l,%c%V%)\ %<%P " offset
@@ -155,7 +155,7 @@
   let NERDTreeHighlightCursorline = 1
   let NERDTreeShowBookmarks = 1
   let NERDTreeShowHidden = 1
-"  let NERDTreeQuitOnOpen = 1
+" let NERDTreeQuitOnOpen = 1
 
   :nmap <F2> :NERDTreeToggle<cr>
 
