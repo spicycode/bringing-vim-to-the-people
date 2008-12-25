@@ -21,7 +21,6 @@
 
 " Highlight matching parens
   set showmatch
-
   set completeopt=menu,preview
   
 " Use the tab complete menu
@@ -84,6 +83,9 @@
   :nmap ,tn :tabnext<cr>
   :nmap ,tp :tabprevious<cr>  
   :nmap ,te :tabedit  
+
+" Remap F1 from Help to ESC.  No more accidents
+  nmap <F1> <Esc
 
 " SHELL
   command! -complete=file -nargs=+ Shell call s:RunShellCommand(<q-args>)
@@ -155,7 +157,6 @@
   let NERDTreeHighlightCursorline = 1
   let NERDTreeShowBookmarks = 1
   let NERDTreeShowHidden = 1
-" let NERDTreeQuitOnOpen = 1
 
   :nmap <F2> :NERDTreeToggle<cr>
 
