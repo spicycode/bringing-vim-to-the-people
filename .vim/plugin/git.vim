@@ -13,7 +13,7 @@ nnoremap <Leader>gl :GitLog<Enter>
 nnoremap <Leader>ga :GitAdd<Enter>
 nnoremap <Leader>gA :GitAdd <cfile><Enter>
 nnoremap <Leader>gc :GitCommit<Enter>
-nnoremap <Leader>gp :GitPush<Enter>
+nnoremap <Leader>gpp :GitPullAndPush<Enter>
 nnoremap <Leader>gb :GitBlame<Enter>
 
 " Ensure b:git_dir exists.
@@ -27,9 +27,9 @@ function! s:GetGitDir()
     return b:git_dir
 endfunction
 
-" Pushes the repository to an external server
-function! GitPush(args)
-  let git_output = system('git push ' . a:args . ' -- ')
+" Performs a git pull, then a git push
+function! GitPullAndPush(args)
+  let git_output = system('git pull && git push ' . a:args . ' --')
 	echo git_output
 endfunction
 
@@ -253,5 +253,5 @@ command! -nargs=1 GitCatFile          call GitCatFile(<q-args>)
 command! -nargs=+ Git                 call GitDoCommand(<q-args>)
 command!          GitVimDiffMerge     call GitVimDiffMerge()
 command!          GitVimDiffMergeDone call GitVimDiffMergeDone()
-command! -nargs=? GitPush             call GitPush(<q-args>)
+command! -nargs=? GitPullAndPush      call GitPullAndPush(<q-args>)
 command!          GitBlame            call GitBlame()
