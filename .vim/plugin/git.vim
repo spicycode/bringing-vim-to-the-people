@@ -13,19 +13,33 @@ nnoremap <Leader>gl :GitLog<Enter>
 nnoremap <Leader>ga :GitAdd<Enter>
 nnoremap <Leader>gA :GitAdd <cfile><Enter>
 nnoremap <Leader>gc :GitCommit<Enter>
+nnoremap <Leader>gp :GitPush<Enter>
+nnoremap <Leader>gb :GitBlame<Enter>
 
-" Returns current git branch.
-" Call inside 'statusline' or 'titlestring'.
-function! GitBranch()
+" Ensure b:git_dir exists.
+function! s:GetGitDir()
     if !exists('b:git_dir')
         let b:git_dir = finddir('.git', expand('%:p:h') . ';/')
         if strlen(b:git_dir)
             let b:git_dir = fnamemodify(b:git_dir, ':p')
         endif
     endif
+    return b:git_dir
+endfunction
 
-    if strlen(b:git_dir) && filereadable(b:git_dir . 'HEAD')
-        let lines = readfile(b:git_dir . 'HEAD')
+" Pushes the repository to an external server
+function! GitPush(args)
+  let git_output = system('git push ' . a:args . ' -- ')
+	echo git_output
+endfunction
+
+" Returns current git branch.
+" Call inside 'statusline' or 'titlestring'.
+function! GitBranch()
+    let git_dir = <SID>GetGitDir()
+
+    if strlen(git_dir) && filereadable(git_dir . 'HEAD')
+        let lines = readfile(git_dir . 'HEAD')
         return len(lines) ? matchstr(lines[0], '[^/]*$') : ''
     else
         return ''
@@ -71,7 +85,7 @@ function! GitDiff(args)
     endif
 
     call <SID>OpenGitBuffer(git_output)
-    setlocal filetype=diff
+    setlocal filetype=git-diff
 endfunction
 
 " Show Status.
@@ -79,16 +93,28 @@ function! GitStatus()
     let git_output = system('git status')
     call <SID>OpenGitBuffer(git_output)
     setlocal filetype=git-status
-    nnoremap <buffer> <CR> :GitAdd <cfile><CR>:call GitStatus()<CR>
+    nnoremap <buffer> <Enter> :GitAdd <cfile><Enter>:call <SID>RefreshGitStatus()<Enter>
+    nnoremap <buffer> -       :silent !git reset HEAD -- =expand('<cfile>')<Enter><Enter>:call <SID>RefreshGitStatus()<Enter>
+endfunction
+
+function! s:RefreshGitStatus()
+    let pos_save = getpos('.')
+    GitStatus
+    call setpos('.', pos_save)
+endfunction
+
+" Blame
+function! GitBlame()
+    let git_output = system('git blame -- ' . s:Expand('%'))
+    call <SID>OpenGitBuffer(git_output)
+    setlocal filetype=git-blame
 endfunction
 
 " Show Log.
-function! GitLog()
-    let git_output = system('git log -- ' . s:Expand('%'))
+function! GitLog(args)
+    let git_output = system('git log ' . a:args . ' -- ' . s:Expand('%'))
     call <SID>OpenGitBuffer(git_output)
     setlocal filetype=git-log
-    set buftype=nofile
-    set bufhidden=delete
 endfunction
 
 " Add file to index.
@@ -100,6 +126,8 @@ endfunction
 
 " Commit.
 function! GitCommit(args)
+    let git_dir = <SID>GetGitDir()
+
     " Create COMMIT_EDITMSG file
     let editor_save = $EDITOR
     let $EDITOR = ''
@@ -218,10 +246,12 @@ endfunction
 command! -nargs=1 -complete=customlist,ListGitCommits GitCheckout call GitCheckout(<q-args>)
 command! -nargs=* -complete=customlist,ListGitCommits GitDiff     call GitDiff(<q-args>)
 command!          GitStatus           call GitStatus()
-command! -nargs=? GitAdd              call GitAdd(<q-args>)
-command!          GitLog              call GitLog()
+command! -nargs=? -complete=file GitAdd              call GitAdd(<q-args>)
+command! -nargs=* GitLog              call GitLog(<q-args>)
 command! -nargs=* GitCommit           call GitCommit(<q-args>)
 command! -nargs=1 GitCatFile          call GitCatFile(<q-args>)
 command! -nargs=+ Git                 call GitDoCommand(<q-args>)
 command!          GitVimDiffMerge     call GitVimDiffMerge()
 command!          GitVimDiffMergeDone call GitVimDiffMergeDone()
+command! -nargs=? GitPush             call GitPush(<q-args>)
+command!          GitBlame            call GitBlame()
