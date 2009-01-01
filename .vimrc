@@ -87,6 +87,9 @@
 " Remap F1 from Help to ESC.  No more accidents
   nmap <F1> <Esc
 
+" <leader>f to startup an ack search
+  map <leader>f :Ack<space>
+
 " SHELL
   command! -complete=file -nargs=+ Shell call s:RunShellCommand(<q-args>)
 
