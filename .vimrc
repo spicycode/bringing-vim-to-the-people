@@ -160,6 +160,14 @@
 
   :nmap <F2> :NERDTreeToggle<cr>
 
+" NERDComment {{{
+  let NERDShutUp = 1
+  " bind command-/ to toggle comment
+  " requires NERD Commenter to be installed: http://www.vim.org/scripts/script.php?script_id=1218
+  nmap <D-/> ,c<space>
+  vmap <D-/> ,c<space>
+  imap <D-/> <C-O>,c<space>
+
   autocmd FileType irb inoremap <buffer> <silent> <Cr> <Esc>:<C-u>ruby v=VIM::Buffer.current;v.append(v.line_number, eval(v[v.line_number]).inspect)<Cr>
   nnoremap ,irb :<C-u>below new<Cr>:setfiletype irb<Cr>:set syntax=ruby<Cr>:set buftype=nofile<Cr>:set bufhidden=delete<Cr>i
 
