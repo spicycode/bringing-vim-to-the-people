@@ -17,11 +17,38 @@ function! s:HighlightError()
   syntax clear
   syntax match Error  /^.*$/
 endfunction
+
+function! s:OpenBuffer(nr, mode)
+  execute printf([
+        \   ':%sbuffer',
+        \   ':%ssbuffer',
+        \   ':vertical :%ssbuffer',
+        \   ':tab :%ssbuffer',
+        \ ][a:mode], a:nr)
+endfunction
+
+function! s:OpenFile(path, mode)
+  let nr = bufnr('^' . a:path . '$')
+  if nr > -1
+    call s:OpenBuffer(nr, a:mode)
+  else
+    execute [
+          \   ':edit ',
+          \   ':split ',
+          \   ':vsplit ',
+          \   ':tabedit ',
+          \ ][a:mode] . s:EscapeFilename(a:path)
+  endif
+endfunction
+
+function! s:EscapeFilename(fn)
+  return escape(a:fn, " \t\n*?[{`$%#'\"|!<")
+endfunction
 " ------------------------------------------------------------------------------------
 " }}}
 " ====================================================================================
 
-command! -bang -narg=? -complete=file   FuzzyFinderTextMate   call FuzzyFinderTextMateLauncher(<q-args>, len(<q-bang>), bufnr('%'), s:GetCurrentTagFiles())
+command! -bang -narg=? -complete=file   FuzzyFinderTextMate   call FuzzyFinderTextMateLauncher(<q-args>, len(<q-bang>))
 
 function! InstantiateTextMateMode() "{{{
 ruby << RUBY
@@ -61,9 +88,9 @@ RUBY
     let g:fuzzy_ignore = ""
   endif
 
-  " Configuration option: g:fuzzy_matching_limit
+  " Configuration option: g:fuzzy_enumerating_limit
   " The maximum number of matches to return at a time. Defaults to 200, via the
-  " g:FuzzyFinderMode.TextMate.matching_limit variable, but using a global variable
+  " g:FuzzyFinderMode.TextMate.enumerating_limit variable, but using a global variable
   " makes it easier to set this value.
 
 ruby << RUBY
@@ -98,10 +125,10 @@ RUBY
 
     let result = []
 
-    if exists('g:fuzzy_matching_limit')
-      let l:limit = g:fuzzy_matching_limit
+    if exists('g:fuzzy_enumerating_limit')
+      let l:limit = g:fuzzy_enumerating_limit
     else
-      let l:limit = self.matching_limit
+      let l:limit = self.enumerating_limit
     endif
 
     ruby << RUBY
@@ -117,7 +144,7 @@ RUBY
       end
 RUBY
 
-    if empty(result) || len(result) >= self.matching_limit
+    if empty(result) || len(result) >= l:limit
       call s:HighlightError()
     endif
 
@@ -128,20 +155,24 @@ RUBY
     return result
   endfunction
 
-  function! FuzzyFinderTextMateLauncher(initial_text, partial_matching, prev_bufnr, tag_files)
-    call g:FuzzyFinderMode.TextMate.launch(a:initial_text, a:partial_matching, a:prev_bufnr, a:tag_files)
+  function! FuzzyFinderTextMateLauncher(initial_text, partial_matching)
+    call g:FuzzyFinderMode.TextMate.launch(a:initial_text, a:partial_matching)
+  endfunction
+
+  function! g:FuzzyFinderMode.TextMate.on_open(expr, mode)
+    call s:OpenFile(fnamemodify(a:expr, ':~:.'), a:mode)
   endfunction
 
   let g:FuzzyFinderOptions.TextMate = copy(g:FuzzyFinderOptions.File)
 endfunction "}}}
 
 if !exists('loaded_fuzzyfinder') "{{{
-  function! FuzzyFinderTextMateLauncher(initial_text, partial_matching, prev_bufnr, tag_files)
+  function! FuzzyFinderTextMateLauncher(initial_text, partial_matching)
     call InstantiateTextMateMode()
-    function! FuzzyFinderTextMateLauncher(initial_text, partial_matching, prev_bufnr, tag_files)
-      call g:FuzzyFinderMode.TextMate.launch(a:initial_text, a:partial_matching, a:prev_bufnr, a:tag_files)
+    function! FuzzyFinderTextMateLauncher(initial_text, partial_matching)
+      call g:FuzzyFinderMode.TextMate.launch(a:initial_text, a:partial_matching)
     endfunction
-    call g:FuzzyFinderMode.TextMate.launch(a:initial_text, a:partial_matching, a:prev_bufnr, a:tag_files)
+    call g:FuzzyFinderMode.TextMate.launch(a:initial_text, a:partial_matching)
   endfunction
   finish
 end "}}}
