@@ -25,7 +25,7 @@
   
 " Use the tab complete menu
   set wildmenu 
-  set wildmode=list:longest
+  set wildmode=list:longest,full
 
 " have the mouse enabled all the time:
   set mouse=a
@@ -176,6 +176,6 @@
 
   " Textmate Fuzzy Finder ignores
   let g:fuzzy_ignore = "*.png;*.PNG;*.JPG;*.jpg;*.GIF;*.gif;vendor/**;coverage/**;tmp/**"
-  let g:fuzzy_matching_limit = 20
+  let g:fuzzy_matching_limit = 40
 
   runtime user_settings.vim
