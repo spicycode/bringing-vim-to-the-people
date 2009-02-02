@@ -85,7 +85,8 @@
   :nmap ,te :tabedit  
 
 " Remap F1 from Help to ESC.  No more accidents
-  nmap <F1> <Esc
+  nmap <F1> <Esc>
+  map! <F1> <Esc>
 
 " <leader>f to startup an ack search
   map <leader>f :Ack<space>
@@ -177,5 +178,12 @@
   " Textmate Fuzzy Finder ignores
   let g:fuzzy_ignore = "*.png;*.PNG;*.JPG;*.jpg;*.GIF;*.gif;vendor/**;coverage/**;tmp/**"
   let g:fuzzy_matching_limit = 40
+
+
+  autocmd FileType ruby set omnifunc=rubycomplete#Complete
+  autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
+  autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
+  autocmd FileType css set omnifunc=csscomplete#CompleteCSS
+  autocmd FileType xml set omnifunc=xmlcomplete#CompleteTags
 
   runtime user_settings.vim
