@@ -4,7 +4,11 @@
 :map <D-]> :tabnext<cr>
 :imap <D-[> <ESC>:tabprevious<cr>i
 :imap <D-]> <ESC>:tabnext<cr>i
+
 " Unmap Apple+T
 macmenu &File.New\ Tab key=<nop>
 " FuzzyFinder
 nnoremap <D-t> :FuzzyFinderTextMate<CR> 
+
+" Run file in shell mode with ruby
+nnoremap <D-r> :Shell ruby %<cr>
