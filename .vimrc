@@ -1,6 +1,6 @@
   scriptencoding utf-8
 
-  " Change <Leader>
+" Change <Leader>
   let mapleader = ","
 
 " Set temporary directory (don't litter local dir with swp/tmp files)
@@ -42,12 +42,13 @@
   set shiftwidth=2
 
   set autoindent
-  set smartindent
+  set smartindent "helps with backspacing because of expandtab
   
-""Set to auto read when a file is changed from the outside
+" Set to auto read when a file is changed from the outside
   set autoread
 
 " * Search & Replace
+
 " show the `best match so far' as search strings are typed:
   set incsearch
 
@@ -58,38 +59,38 @@
   set number
   setlocal numberwidth=3
 
-" FILE BROWSING
+" * File Browsing
+
 " Settings for explorer.vim
   let g:explHideFiles='^\.'
 
 " Settings fo rnetrw
   let g:netrw_list_hide='^\.,\~$'
 
-" ENABLE THE TAB BAR
-"  set tabline=%!MyTabLine()
+" Enable the tab bar
   set showtabline=2 " 2=always
 
-" MAKE BACKSPACE WORK IN INSERT MODE
+" Make backspace work in insert mode
   set backspace=indent,eol,start
 
-" REMEMBER LAST POSITION IN FILE
+" Remember last position in file
   au BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal g'\"" | endif
 
-" MAKE IT EASY TO UPDATE/RELOAD_vimrc 
-  :nmap ,s :source ~/.vimrc<cr>
-  :nmap ,v :tabe ~/.vimrc<cr>
+" Make it easy to update/reload .vimrc 
+  nmap <leader>s :source ~/.vimrc<CR>
+  nmap <leader>v :tabe ~/.vimrc<CR>
   
-" TAB NAVIGATION
-  :nmap ,tn :tabnext<cr>
-  :nmap ,tp :tabprevious<cr>  
-  :nmap ,te :tabedit  
+" Tab navigation
+  nmap <leader>tn :tabnext<CR>
+  nmap <leader>tp :tabprevious<CR>  
+  nmap <leader>te :tabedit  
 
 " Remap F1 from Help to ESC.  No more accidents
   nmap <F1> <Esc>
   map! <F1> <Esc>
 
 " <leader>f to startup an ack search
-  map <leader>f :Ack<space>
+  map <leader>f :Ack<Space>
 
 " SHELL
   command! -complete=file -nargs=+ Shell call s:RunShellCommand(<q-args>)
@@ -112,17 +113,19 @@
     1
   endfunction
 
-  :nmap ,sh :Shell 
+  nmap <leader>sh :Shell 
 
-" find file in project
-  :nmap ,t :FuzzyFinderTextMate<cr> 
+" Fuzzy find files in project a la TextMate
+  nmap <leader>t :FuzzyFinderTextMate<CR> 
+  let g:fuzzy_ignore = "*.png;*.PNG;*.JPG;*.jpg;*.GIF;*.gif;vendor/**;coverage/**;tmp/**"
+  let g:fuzzy_matching_limit = 40
 
-" Run file with 
-  :nmap ,sf :Shell script/spec -fn %<cr>
-  :nmap ,st :Shell ruby %<cr>
+" Run file with...
+  nmap <leader>sf :Shell script/spec -fn %<CR>
+  nmap <leader>st :Shell ruby %<CR>
   
 " Quick, jump out of insert mode while no one is looking
-  :imap ii <Esc>
+  imap ii <Esc>
 
 " Nice statusbar
   set laststatus=2
@@ -153,8 +156,8 @@
   let Tlist_Use_Right_Window = 1
   let Tlist_Exit_OnlyWindow = 1 "Exit if only the taglist is open
   let Tlist_File_Fold_Auto_Close = 1 " Only auto expand the current file
-  :nmap ,ta ::TlistAddFilesRecursive app<cr>TlistAddFilesRecursive lib<cr>TlistAddFilesRecursive public/stylesheets<cr>
-  :nmap <F3> :TlistToggle<cr>
+  nmap <leader>ta ::TlistAddFilesRecursive app<CR>TlistAddFilesRecursive lib<CR>TlistAddFilesRecursive public/stylesheets<CR>
+  nmap <F3> :TlistToggle<CR>
 
 " NERDTree {{{
   let NERDChristmasTree = 1
@@ -162,28 +165,29 @@
   let NERDTreeShowBookmarks = 1
   let NERDTreeShowHidden = 1
 
-  :nmap <F2> :NERDTreeToggle<cr>
+  nmap <F2> :NERDTreeToggle<CR>
 
 " NERDComment {{{
   let NERDShutUp = 1
   " bind command-/ to toggle comment
   " requires NERD Commenter to be installed: http://www.vim.org/scripts/script.php?script_id=1218
-  nmap <D-/> ,c<space>
-  vmap <D-/> ,c<space>
-  imap <D-/> <C-O>,c<space>
+  nmap <D-/> ,c<Space>
+  vmap <D-/> ,c<Space>
+  imap <D-/> <C-O>,c<Space>
 
-  autocmd FileType irb inoremap <buffer> <silent> <Cr> <Esc>:<C-u>ruby v=VIM::Buffer.current;v.append(v.line_number, eval(v[v.line_number]).inspect)<Cr>
-  nnoremap ,irb :<C-u>below new<Cr>:setfiletype irb<Cr>:set syntax=ruby<Cr>:set buftype=nofile<Cr>:set bufhidden=delete<Cr>i
+" IRB {{{
+  autocmd FileType irb inoremap <buffer> <silent> <CR> <Esc>:<C-u>ruby v=VIM::Buffer.current;v.append(v.line_number, eval(v[v.line_number]).inspect)<CR>
+  nnoremap <leader>irb :<C-u>below new<CR>:setfiletype irb<CR>:set syntax=ruby<CR>:set buftype=nofile<CR>:set bufhidden=delete<CR>i
 
-  " Textmate Fuzzy Finder ignores
-  let g:fuzzy_ignore = "*.png;*.PNG;*.JPG;*.jpg;*.GIF;*.gif;vendor/**;coverage/**;tmp/**"
-  let g:fuzzy_matching_limit = 40
-
-
+" Turn on language specific omnifuncs
   autocmd FileType ruby set omnifunc=rubycomplete#Complete
+  autocmd FileType python set omnifunc=pythoncomplete#Complete
   autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
   autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
   autocmd FileType css set omnifunc=csscomplete#CompleteCSS
   autocmd FileType xml set omnifunc=xmlcomplete#CompleteTags
+  autocmd FileType php set omnifunc=phpcomplete#CompletePHP
+  autocmd FileType c set omnifunc=ccomplete#Complete
 
+" load user settings
   runtime user_settings.vim
