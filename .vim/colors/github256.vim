@@ -297,6 +297,7 @@ if has("gui_running") || &t_Co == 88 || &t_Co == 256
 	call <SID>X("ModeMsg", "", "", "bold")
 	call <SID>X("Normal", "000000", "f8f8ff", "")
 	call <SID>X("StatusLine", "666666", "eaeaea", "")
+	call <SID>X("StatusLineNC", "eaeaea", "666666", "")
 	call <SID>X("Visual", "", "ffffcc", "")
 
 	" delete functions {{{
