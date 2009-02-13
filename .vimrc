@@ -66,7 +66,7 @@
   let g:netrw_list_hide='^\.,\~$'
 
 " ENABLE THE TAB BAR
-  set tabline=%!MyTabLine()
+"  set tabline=%!MyTabLine()
   set showtabline=2 " 2=always
 
 " MAKE BACKSPACE WORK IN INSERT MODE
