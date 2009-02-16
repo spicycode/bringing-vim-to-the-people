@@ -119,6 +119,16 @@
   nmap <leader>t :FuzzyFinderTextMate<CR> 
   let g:fuzzy_ignore = "*.png;*.PNG;*.JPG;*.jpg;*.GIF;*.gif;vendor/**;coverage/**;tmp/**"
   let g:fuzzy_matching_limit = 40
+  
+" Use FuzzyFinder to replace built-in tag navigation :tag and <C-]>:
+  nnoremap <silent> <C-f><C-t> :FuzzyFinderTag!<CR>
+  nnoremap <silent> <C-]>      :FuzzyFinderTag! <C-r>=expand('<cword>')<CR><CR>
+  
+  " Add RebuildTagsFile function/command
+  function! s:RebuildTagsFile()
+    !ctags -R --exclude=coverage --exclude=vendor *
+  endfunction
+  command! -nargs=0 RebuildTagsFile call s:RebuildTagsFile()
 
 " Run file with...
   nmap <leader>sf :Shell script/spec -fn %<CR>
@@ -156,7 +166,6 @@
   let Tlist_Use_Right_Window = 1
   let Tlist_Exit_OnlyWindow = 1 "Exit if only the taglist is open
   let Tlist_File_Fold_Auto_Close = 1 " Only auto expand the current file
-  nmap <leader>ta ::TlistAddFilesRecursive app<CR>TlistAddFilesRecursive lib<CR>TlistAddFilesRecursive public/stylesheets<CR>
   nmap <F3> :TlistToggle<CR>
 
 " NERDTree {{{
@@ -164,7 +173,6 @@
   let NERDTreeHighlightCursorline = 1
   let NERDTreeShowBookmarks = 1
   let NERDTreeShowHidden = 1
-
   nmap <F2> :NERDTreeToggle<CR>
 
 " NERDComment {{{
