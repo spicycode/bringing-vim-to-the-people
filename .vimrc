@@ -117,7 +117,7 @@
 
 " Fuzzy find files in project a la TextMate
   nmap <leader>t :FuzzyFinderTextMate<CR> 
-  let g:fuzzy_ignore = "*.png;*.PNG;*.JPG;*.jpg;*.GIF;*.gif;vendor/**;coverage/**;tmp/**"
+  let g:fuzzy_ignore = "*.png;*.PNG;*.JPG;*.jpg;*.GIF;*.gif;files/**;vendor/**;coverage/**;tmp/**"
   let g:fuzzy_matching_limit = 40
   
 " Use FuzzyFinder to replace built-in tag navigation :tag and <C-]>:
@@ -126,7 +126,7 @@
   
   " Add RebuildTagsFile function/command
   function! s:RebuildTagsFile()
-    !ctags -R --exclude=coverage --exclude=vendor *
+    !ctags -R --exclude=coverage --exclude=files --exclude=public --exclude=log --exclude=tmp --exclude=vendor *
   endfunction
   command! -nargs=0 RebuildTagsFile call s:RebuildTagsFile()
 

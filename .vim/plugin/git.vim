@@ -13,8 +13,6 @@ nnoremap <Leader>gl :GitLog<Enter>
 nnoremap <Leader>ga :GitAdd<Enter>
 nnoremap <Leader>gA :GitAdd <cfile><Enter>
 nnoremap <Leader>gc :GitCommit<Enter>
-nnoremap <Leader>gpp :GitPullAndPush<Enter>
-nnoremap <Leader>gb :GitBlame<Enter>
 
 " Ensure b:git_dir exists.
 function! s:GetGitDir()
@@ -25,12 +23,6 @@ function! s:GetGitDir()
         endif
     endif
     return b:git_dir
-endfunction
-
-" Performs a git pull, then a git push
-function! GitPullAndPush(args)
-  let git_output = system('git pull && git push ' . a:args . ' --')
-	echo git_output
 endfunction
 
 " Returns current git branch.
@@ -103,13 +95,6 @@ function! s:RefreshGitStatus()
     call setpos('.', pos_save)
 endfunction
 
-" Blame
-function! GitBlame()
-    let git_output = system('git blame -- ' . s:Expand('%'))
-    call <SID>OpenGitBuffer(git_output)
-    setlocal filetype=git-blame
-endfunction
-
 " Show Log.
 function! GitLog(args)
     let git_output = system('git log ' . a:args . ' -- ' . s:Expand('%'))
@@ -134,8 +119,7 @@ function! GitCommit(args)
     call system('git commit ' . a:args)
     let $EDITOR = editor_save
 
-    call GitBranch()
-    execute printf('%s %sCOMMIT_EDITMSG', g:git_command_edit, b:git_dir)
+    execute printf('%s %sCOMMIT_EDITMSG', g:git_command_edit, git_dir)
     setlocal filetype=git-status bufhidden=wipe
     augroup GitCommit
         autocmd BufWritePre  <buffer> g/^#\|^\s*$/d | setlocal fileencoding=utf-8
@@ -246,12 +230,10 @@ endfunction
 command! -nargs=1 -complete=customlist,ListGitCommits GitCheckout call GitCheckout(<q-args>)
 command! -nargs=* -complete=customlist,ListGitCommits GitDiff     call GitDiff(<q-args>)
 command!          GitStatus           call GitStatus()
-command! -nargs=? -complete=file GitAdd              call GitAdd(<q-args>)
+command! -nargs=? GitAdd              call GitAdd(<q-args>)
 command! -nargs=* GitLog              call GitLog(<q-args>)
 command! -nargs=* GitCommit           call GitCommit(<q-args>)
 command! -nargs=1 GitCatFile          call GitCatFile(<q-args>)
 command! -nargs=+ Git                 call GitDoCommand(<q-args>)
 command!          GitVimDiffMerge     call GitVimDiffMerge()
 command!          GitVimDiffMergeDone call GitVimDiffMergeDone()
-command! -nargs=? GitPullAndPush      call GitPullAndPush(<q-args>)
-command!          GitBlame            call GitBlame()

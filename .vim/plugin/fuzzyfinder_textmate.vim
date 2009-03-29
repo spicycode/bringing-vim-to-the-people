@@ -4,52 +4,22 @@ if has("ruby")
 " COPIED FROM FUZZYFINDER.VIM {{{
 " since they can't be called from outside fuzzyfinder.vim
 " ====================================================================================
-function! s:GetCurrentTagFiles()
-  return sort(filter(map(tagfiles(), 'fnamemodify(v:val, '':p'')'), 'filereadable(v:val)'))
+
+function! s:ExistsPrompt(line, prompt)
+  return  strlen(a:line) >= strlen(a:prompt) && a:line[:strlen(a:prompt) -1] ==# a:prompt
 endfunction
 
-function! s:HighlightPrompt(prompt, highlight)
-  syntax clear
-  execute printf('syntax match %s /^\V%s/', a:highlight, escape(a:prompt, '\'))
+function! s:RemovePrompt(line, prompt)
+  return a:line[(s:ExistsPrompt(a:line, a:prompt) ? strlen(a:prompt) : 0):]
 endfunction
 
-function! s:HighlightError()
-  syntax clear
-  syntax match Error  /^.*$/
-endfunction
-
-function! s:OpenBuffer(nr, mode)
-  execute printf([
-        \   ':%sbuffer',
-        \   ':%ssbuffer',
-        \   ':vertical :%ssbuffer',
-        \   ':tab :%ssbuffer',
-        \ ][a:mode], a:nr)
-endfunction
-
-function! s:OpenFile(path, mode)
-  let nr = bufnr('^' . a:path . '$')
-  if nr > -1
-    call s:OpenBuffer(nr, a:mode)
-  else
-    execute [
-          \   ':edit ',
-          \   ':split ',
-          \   ':vsplit ',
-          \   ':tabedit ',
-          \ ][a:mode] . s:EscapeFilename(a:path)
-  endif
-endfunction
-
-function! s:EscapeFilename(fn)
-  return escape(a:fn, " \t\n*?[{`$%#'\"|!<")
-endfunction
 " ------------------------------------------------------------------------------------
 " }}}
 " ====================================================================================
 
 command! -bang -narg=? -complete=file   FuzzyFinderTextMate   call FuzzyFinderTextMateLauncher(<q-args>, len(<q-bang>))
-
+command! FuzzyFinderTextMateRefreshFiles ruby refresh_finder
+  
 function! InstantiateTextMateMode() "{{{
 ruby << RUBY
   begin
@@ -88,6 +58,13 @@ RUBY
     let g:fuzzy_ignore = ""
   endif
 
+  " Configuration option: g:fuzzy_path_display
+  " Set to `abbr` if you want to display the abbreviated path to a file,
+  " `full` to display the full path
+  if !exists('g:fuzzy_path_display')
+    let g:fuzzy_path_display = 'abbr'
+  endif
+
   " Configuration option: g:fuzzy_enumerating_limit
   " The maximum number of matches to return at a time. Defaults to 200, via the
   " g:FuzzyFinderMode.TextMate.enumerating_limit variable, but using a global variable
@@ -102,67 +79,46 @@ ruby << RUBY
       FuzzyFileFinder.new(roots, ceiling, ignore)
     end
   end
+
+  def refresh_finder
+    @finder = nil
+    finder
+    nil
+  end
 RUBY
 
   let g:FuzzyFinderMode.TextMate = copy(g:FuzzyFinderMode.Base)
 
-  " ================================================================================
-  " This function is copied almost whole-sale from fuzzyfinder.vim. Ideally, I could
-  " used the on_complete callback to more cleanly add the new behavior, but the
-  " TextMate-style completion broke a few of fuzzyfinder.vim's assumptions, and the
-  " only way to patch that up was to override Base.complete...which required me to
-  " copy-and-paste much of the original implementation.
-  "
-  " Ugly. But effective.
-  " ================================================================================
-  function! g:FuzzyFinderMode.TextMate.complete(findstart, base)
-    if a:findstart
-      return 0
-    elseif  !self.exists_prompt(a:base) || len(self.remove_prompt(a:base)) < self.min_length
-      return []
-    endif
-    call s:HighlightPrompt(self.prompt, self.prompt_highlight)
-
-    let result = []
-
+  function! g:FuzzyFinderMode.TextMate.on_complete(base)
     if exists('g:fuzzy_enumerating_limit')
-      let l:limit = g:fuzzy_enumerating_limit
+      let l:enumerating_limit = g:fuzzy_enumerating_limit
     else
-      let l:limit = self.enumerating_limit
+      let l:enumerating_limit = self.enumerating_limit
     endif
-
+    let result = []
     ruby << RUBY
-      text = VIM.evaluate('self.remove_prompt(a:base)')
-      limit = VIM.evaluate('l:limit').to_i
 
-      matches = finder.find(text, limit)
-      matches.sort_by { |a| [-a[:score], a[:path]] }.each_with_index do |match, index|
+      text = VIM.evaluate('s:RemovePrompt(a:base,self.prompt)')
+      enumerating_limit = VIM.evaluate('l:enumerating_limit').to_i
+      path_display = VIM.evaluate("g:fuzzy_path_display")
+      ceiling = VIM.evaluate('g:fuzzy_ceiling').to_i
+
+      matches = finder.find(text, ceiling)
+      matches_length = matches.length
+      matches.sort_by { |a| [-a[:score], a[:path]] }[0,enumerating_limit].each_with_index do |match, index|
         word = match[:path]
-        abbr = "%2d: %s" % [index+1, match[:abbr]]
+        abbr = "%2d: %s" % [index+1, match[path_display.to_sym]]
         menu = "[%5d]" % [match[:score] * 10000]
-        VIM.evaluate("add(result, { 'word' : #{word.inspect}, 'abbr' : #{abbr.inspect}, 'menu' : #{menu.inspect} })")
+        VIM.evaluate("add(result, { 'word' : fnamemodify(#{word.inspect},':~:.'), 'abbr' : #{abbr.inspect}, 'menu' : #{menu.inspect}, 'ranks': [#{index}] })")
       end
 RUBY
-
-    if empty(result) || len(result) >= l:limit
-      call s:HighlightError()
-    endif
-
-    if !empty(result)
-      call feedkeys("\<C-p>\<Down>", 'n')
-    endif
-
     return result
   endfunction
 
   function! FuzzyFinderTextMateLauncher(initial_text, partial_matching)
     call g:FuzzyFinderMode.TextMate.launch(a:initial_text, a:partial_matching)
   endfunction
-
-  function! g:FuzzyFinderMode.TextMate.on_open(expr, mode)
-    call s:OpenFile(fnamemodify(a:expr, ':~:.'), a:mode)
-  endfunction
-
+  
   let g:FuzzyFinderOptions.TextMate = copy(g:FuzzyFinderOptions.File)
 endfunction "}}}
 
