@@ -119,7 +119,8 @@
   nmap <leader>t :FuzzyFinderTextMate<CR> 
   let g:fuzzy_ignore = "*.png;*.PNG;*.JPG;*.jpg;*.GIF;*.gif;files/**;vendor/**;coverage/**;tmp/**"
   let g:fuzzy_matching_limit = 40
-  
+  let g:fuzzy_path_display = 'relative_path'
+
 " Use FuzzyFinder to replace built-in tag navigation :tag and <C-]>:
   nnoremap <silent> <C-f><C-t> :FuzzyFinderTag!<CR>
   nnoremap <silent> <C-]>      :FuzzyFinderTag! <C-r>=expand('<cword>')<CR><CR>

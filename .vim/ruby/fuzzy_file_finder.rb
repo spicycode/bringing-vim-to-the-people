@@ -320,6 +320,7 @@ class FuzzyFileFinder
         abbr = shortened_path.empty? ? match_result[:result] : File.join(shortened_path, match_result[:result])
 
         result = { :path => file.path,
+                   :relative_path => File.join(file.parent.name.gsub(shared_prefix, ""), file.name).sub('/',''),
                    :abbr => abbr,
                    :directory => file.parent.name,
                    :name => file.name,
