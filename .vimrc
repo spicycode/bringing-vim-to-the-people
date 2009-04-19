@@ -231,6 +231,6 @@
 " have some fun with bufexplorer
   let g:bufExplorerDefaultHelp=0       " Do not show default help.
   let g:bufExplorerShowRelativePath=1  " Show relative paths.
-
+  
 " load user settings
   runtime user_settings.vim
