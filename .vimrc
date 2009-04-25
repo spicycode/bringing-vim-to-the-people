@@ -60,13 +60,21 @@
 
 " enable line numbers
   set number
-  setlocal numberwidth=3
+  set numberwidth=3
+
+  " Display extra whitespace
+  set list listchars=tab:»·,trail:·
 
   "folding settings
-  set foldmethod=indent   "fold based on indent
-  set foldnestmax=10      "deepest fold is 10 levels
-  set nofoldenable        "dont fold by default
-  set foldlevel=1         "this is just what i use
+  if has("folding")
+    set foldenable
+    set foldmethod=syntax
+    set foldlevel=1
+    set foldnestmax=2
+    set foldtext=strpart(getline(v:foldstart),0,50).'\ ...\ '.substitute(getline(v:foldend),'^[\ #]*','','g').'\ '
+    " automatically open folds at the starting cursor position
+    " autocmd BufReadPost .foldo!
+  endif
 
 " * File Browsing
 
