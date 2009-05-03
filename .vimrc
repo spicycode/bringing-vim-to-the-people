@@ -90,9 +90,6 @@
 " Remember last position in file
   au BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal g'\"" | endif
 
-" Make it easy to update/reload .vimrc 
-  nmap <leader>s :source ~/.vimrc<CR>
-  nmap <leader>v :tabe ~/.vimrc<CR>
   
 " Tab navigation
   nmap <leader>tn :tabnext<CR>
