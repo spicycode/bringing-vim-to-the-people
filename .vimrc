@@ -45,7 +45,6 @@
   set shiftwidth=2
 
   set autoindent
-  set smartindent "helps with backspacing because of expandtab
   
 " Set to auto read when a file is changed from the outside
   set autoread
@@ -117,7 +116,7 @@
     setlocal bufhidden=delete 
     setlocal nobuflisted 
     setlocal noswapfile 
-    setlocal nowrap
+    setlocal wrap
     setlocal filetype=shell
     setlocal syntax=shell
 
