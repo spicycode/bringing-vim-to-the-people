@@ -160,6 +160,7 @@
   set statusline+=[
   set statusline+=%{strlen(&ft)?&ft:'none'}, " filetype
   set statusline+=%{&fileformat}] " file format
+  set statusline+=\ %{GitBranch()}
   set statusline+=%h%1*%m%r%w%0* " flag
   set statusline+=%= " right align
   set statusline+=%-14.(%l,%c%V%)\ %<%P " offset
@@ -203,37 +204,12 @@
   autocmd FileType php set omnifunc=phpcomplete#CompletePHP
   autocmd FileType c set omnifunc=ccomplete#Complete
 
-  """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-  function! ScreenRun(text)
-    if !exists("g:screen_sessionname") || !exists("g:screen_windowname")
-      call Screen_Vars()
-    end
-
-    echo system("screen -S " . g:screen_sessionname . " -p " . g:screen_windowname . " -X eval 'stuff \"" . substitute(a:text, "'", "'\\\\''", 'g') . "'\"")
-  endfunction
-
-  function! Screen_Session_Names(A,L,P)
-    return system("screen -ls | awk '/Attached/ {print $1}'")
-  endfunction
-
-  function! Screen_Vars()
-    if !exists("g:screen_sessionname") || !exists("g:screen_windowname")
-      let g:screen_sessionname = ""
-      let g:screen_windowname = "0"
-    end
-
-    let g:screen_sessionname = input("session name: ", "", "custom,Screen_Session_Names")
-    let g:screen_windowname = input("window name: ", g:screen_windowname)
-  endfunction
-  """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-  vmap <C-c><C-c> "ry :call ScreenRun(@r)<CR>
-  nmap <C-c><C-c> vip<C-c><C-c>
-  nmap <C-c>v :call Screen_Vars()<CR>
-
 " have some fun with bufexplorer
   let g:bufExplorerDefaultHelp=0       " Do not show default help.
   let g:bufExplorerShowRelativePath=1  " Show relative paths.
+
+" Set keyword prog for ruby
+  set keywordprg=ri
   
 " load user settings
   runtime user_settings.vim
