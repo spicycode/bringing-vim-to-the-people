@@ -9,18 +9,15 @@
 " Set temporary directory (don't litter local dir with swp/tmp files)
   set directory=/tmp/
 
-" When scrolling off-screen do so 3 lines at a time, not 1
-  set scrolloff=3
-
-" These two enable syntax highlighting
+" Syntax Highlighting on
   set nocompatible
   syntax on
   
-" have one hundred lines of command-line (etc) history:
+" 100 Lines of history
   set history=100
 
-" Show us the command we're typing
-  set showcmd
+" Don't show the command in the modeline
+  set noshowcmd
 
 " Highlight matching parens
   set showmatch
@@ -61,19 +58,17 @@
   set number
   set numberwidth=3
 
-  " Display extra whitespace
+" Display extra whitespace
   "  set list listchars=tab:»·,trail:·
 
-  "folding settings
-  "if has("folding")
-    "set foldenable
-    "set foldmethod=syntax
-    "set foldlevel=1
-    "set foldnestmax=2
-    "set foldtext=strpart(getline(v:foldstart),0,50).'\ ...\ '.substitute(getline(v:foldend),'^[\ #]*','','g').'\ '
-    " automatically open folds at the starting cursor position
-    " autocmd BufReadPost .foldo!
-  "endif
+"folding settings
+  "set foldenable
+  "set foldmethod=syntax
+  "set foldlevel=1
+  "set foldnestmax=2
+  "set foldtext=strpart(getline(v:foldstart),0,50).'\ ...\ '.substitute(getline(v:foldend),'^[\ #]*','','g').'\ '
+  " automatically open folds at the starting cursor position
+  " autocmd BufReadPost .foldo!
 
 " * File Browsing
 
@@ -81,7 +76,7 @@
   let g:explHideFiles='^\.'
 
 " Enable the tab bar
-  set showtabline=2 " 2=always
+  set showtabline=1 " 1=only if there are at least two tabs, 2=always
 
 " Make backspace work in insert mode
   set backspace=indent,eol,start
@@ -104,7 +99,6 @@
 
 	set splitbelow " Open new split windows below current
   
-  au FileType vim set ofu=syntaxcomplete#Complete
 
 " SHELL
   command! -complete=file -nargs=+ Shell call s:RunShellCommand(<q-args>)
@@ -165,11 +159,8 @@
   set statusline+=%= " right align
   set statusline+=%-14.(%l,%c%V%)\ %<%P " offset
 
-" Title: update the title of the window?
-  set title
-
-" Title String: what will actually be displayed
-  set titlestring=VIM:\ %-25.55F\ %a%r%m titlelen=70
+" Title: no title for me
+  set notitle
 
 " Turn off rails bits of statusbar
   let g:rails_statusline=0
@@ -203,6 +194,7 @@
   autocmd FileType xml set omnifunc=xmlcomplete#CompleteTags
   autocmd FileType php set omnifunc=phpcomplete#CompletePHP
   autocmd FileType c set omnifunc=ccomplete#Complete
+  autocmd FileType vim set omnifunc=syntaxcomplete#Complete
 
 " have some fun with bufexplorer
   let g:bufExplorerDefaultHelp=0       " Do not show default help.
