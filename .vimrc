@@ -62,13 +62,10 @@
   "  set list listchars=tab:»·,trail:·
 
 "folding settings
-  "set foldenable
-  "set foldmethod=syntax
-  "set foldlevel=1
-  "set foldnestmax=2
-  "set foldtext=strpart(getline(v:foldstart),0,50).'\ ...\ '.substitute(getline(v:foldend),'^[\ #]*','','g').'\ '
-  " automatically open folds at the starting cursor position
-  " autocmd BufReadPost .foldo!
+  set nofoldenable
+  set foldmethod=indent
+  set foldlevel=1
+  set foldnestmax=10
 
 " * File Browsing
 
@@ -165,14 +162,14 @@
 " Turn off rails bits of statusbar
   let g:rails_statusline=0
  
-" NERDTree {{{
+" NERDTree 
   let NERDChristmasTree = 1
   let NERDTreeHighlightCursorline = 1
   let NERDTreeShowBookmarks = 1
   let NERDTreeShowHidden = 1
   nmap <F2> :NERDTreeToggle<CR>
 
-" NERDComment {{{
+" NERDComment 
   let NERDShutUp = 1
   let NERDDefaultNesting = 0
   " bind command-/ to toggle comment
@@ -181,18 +178,15 @@
   vmap <D-/> ,c<Space>
   imap <D-/> <C-O>,c<Space>
 
-" IRB {{{
+" IRB 
   autocmd FileType irb inoremap <buffer> <silent> <CR> <Esc>:<C-u>ruby v=VIM::Buffer.current;v.append(v.line_number, eval(v[v.line_number]).inspect)<CR>
   nnoremap <leader>irb :<C-u>below new<CR>:setfiletype irb<CR>:set syntax=ruby<CR>:set buftype=nofile<CR>:set bufhidden=delete<CR>i
 
 " Turn on language specific omnifuncs
   autocmd FileType ruby set omnifunc=rubycomplete#Complete
-  autocmd FileType python set omnifunc=pythoncomplete#Complete
   autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
   autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
   autocmd FileType css set omnifunc=csscomplete#CompleteCSS
-  autocmd FileType xml set omnifunc=xmlcomplete#CompleteTags
-  autocmd FileType php set omnifunc=phpcomplete#CompletePHP
   autocmd FileType c set omnifunc=ccomplete#Complete
   autocmd FileType vim set omnifunc=syntaxcomplete#Complete
 
