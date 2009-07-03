@@ -39,10 +39,8 @@
 
   highlight StatusLine gui=NONE guibg=#1A1A1A guifg=white 
   highlight StatusLineNC gui=NONE guibg=#1A1A1A guifg=#808080
-  highlight VertSplit gui=NONE guibg=black guifg=#1A1A1A 
-  highlight LineNr gui=NONE guibg=#1A1A1A guifg=#808080 
 
-  highlight WildMenu gui=NONE guibg=#808080 guifg=black 
+  highlight WildMenu gui=NONE,bold guibg=green guifg=white 
 
   highlight DiffAdded guifg=Black guibg=DarkGreen
   highlight DiffRemoved guifg=Gray guibg=darkred 

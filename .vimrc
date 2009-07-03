@@ -1,5 +1,8 @@
   scriptencoding utf-8
 
+" Enable filetype-specific indenting and plugins
+  filetype plugin indent on
+
 " Explicitly set 256 color support
   set t_Co=256
 
@@ -13,15 +16,9 @@
   set nocompatible
   syntax on
   
-" 100 Lines of history
-  set history=100
-
-" Don't show the command in the modeline
-  set noshowcmd
-
 " Highlight matching parens
   set showmatch
-  set completeopt=menu,preview
+  "set completeopt=menu,preview
   
 " Use the tab complete menu
   set wildmenu 
@@ -46,20 +43,9 @@
 " Set to auto read when a file is changed from the outside
   set autoread
 
-" * Search & Replace
-
-" show the `best match so far' as search strings are typed:
-  set incsearch
-
-" assume the /g flag on :s substitutions to replace all matches in a line:
-  set gdefault
-
 " enable line numbers
   set number
   set numberwidth=3
-
-" Display extra whitespace
-  "  set list listchars=tab:»·,trail:·
 
 "folding settings
   set nofoldenable
@@ -80,7 +66,6 @@
 
 " Remember last position in file
   au BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal g'\"" | endif
-
   
 " Tab navigation
   nmap <leader>tn :tabnext<CR>
@@ -91,46 +76,9 @@
   nmap <F1> <Esc>
   map! <F1> <Esc>
 
-" <leader>f to startup an ack search
-  map <leader>f :Ack<Space>
+	set splitbelow " Open new horizontal split windows below current
+  set splitright " Open new vertical split windows to the right
 
-	set splitbelow " Open new split windows below current
-  
-
-" SHELL
-  command! -complete=file -nargs=+ Shell call s:RunShellCommand(<q-args>)
-
-  function! s:RunShellCommand(cmdline)
-    botright new
-
-    setlocal buftype=nofile 
-    setlocal bufhidden=delete 
-    setlocal nobuflisted 
-    setlocal noswapfile 
-    setlocal wrap
-    setlocal filetype=shell
-    setlocal syntax=shell
-
-    call setline(1,a:cmdline)
-    call setline(2,substitute(a:cmdline,'.','=','g'))
-    execute 'silent $read !'.escape(a:cmdline,'%#')
-    setlocal nomodifiable
-    1
-  endfunction
-
-  nmap <leader>sh :Shell 
-
-" Fuzzy find files in project a la TextMate
-  nmap <leader>t :FuzzyFinderTextMate<CR> 
-  let g:fuzzy_ignore = "*.png;*.PNG;*.JPG;*.jpg;*.GIF;*.gif;files/**;vendor/**;coverage/**;tmp/**"
-  let g:fuzzy_enumerating_limit = 20
-  let g:fuzzy_path_display = 'relative_path'
-  let g:fuzzy_ceiling = 5000
-
-" Use FuzzyFinder to replace built-in tag navigation :tag and <C-]>:
-  nnoremap <silent> <C-f><C-t> :FuzzyFinderTag!<CR>
-  nnoremap <silent> <C-]>      :FuzzyFinderTag! <C-r>=expand('<cword>')<CR><CR>
-  
   " Add RebuildTagsFile function/command
   function! s:RebuildTagsFile()
     !ctags -R --exclude=coverage --exclude=files --exclude=public --exclude=log --exclude=tmp --exclude=vendor *
@@ -144,39 +92,8 @@
 " Quick, jump out of insert mode while no one is looking
   imap ii <Esc>
 
-" Nice statusbar
-  set laststatus=2
-  set statusline=\ "
-  set statusline+=%f\ " file name
-  set statusline+=[
-  set statusline+=%{strlen(&ft)?&ft:'none'}, " filetype
-  set statusline+=%{&fileformat}] " file format
-  set statusline+=\ %{GitBranch()}
-  set statusline+=%h%1*%m%r%w%0* " flag
-  set statusline+=%= " right align
-  set statusline+=%-14.(%l,%c%V%)\ %<%P " offset
-
 " Title: no title for me
   set notitle
-
-" Turn off rails bits of statusbar
-  let g:rails_statusline=0
- 
-" NERDTree 
-  let NERDChristmasTree = 1
-  let NERDTreeHighlightCursorline = 1
-  let NERDTreeShowBookmarks = 1
-  let NERDTreeShowHidden = 1
-  nmap <F2> :NERDTreeToggle<CR>
-
-" NERDComment 
-  let NERDShutUp = 1
-  let NERDDefaultNesting = 0
-  " bind command-/ to toggle comment
-  " requires NERD Commenter to be installed: http://www.vim.org/scripts/script.php?script_id=1218
-  nmap <D-/> ,c<Space>
-  vmap <D-/> ,c<Space>
-  imap <D-/> <C-O>,c<Space>
 
 " IRB 
   autocmd FileType irb inoremap <buffer> <silent> <CR> <Esc>:<C-u>ruby v=VIM::Buffer.current;v.append(v.line_number, eval(v[v.line_number]).inspect)<CR>
@@ -196,6 +113,33 @@
 
 " Set keyword prog for ruby
   set keywordprg=ri
+
+" search next/previous -- center in page
+  nmap n nzz
+  nmap N Nzz
+  nmap * *Nzz
+  nmap # #nzz
+
+" Yank from the cursor to the end of the line, to be consistent with C and D.
+  nnoremap Y y$
+
+" Hide search highlighting
+  map <silent> <leader>nh :nohls <CR>
+
+" toggle Quickfix window with <leader>q
+  map <silent> <leader>q :QFix<CR>
+
+" Mappings for align 
+  vmap <silent> <Leader>i= <ESC>:AlignPush<CR>:AlignCtrl lp1P1<CR>:'<,'>Align =<CR>:AlignPop<CR>
+  vmap <silent> <Leader>i, <ESC>:AlignPush<CR>:AlignCtrl lp0P1<CR>:'<,'>Align ,<CR>:AlignPop<CR>
+  vmap <silent> <Leader>i( <ESC>:AlignPush<CR>:AlignCtrl lp0P0<CR>:'<,'>Align (<CR>:AlignPop<CR>
   
-" load user settings
-  runtime user_settings.vim
+  set term=xterm
+  colorscheme spicycode
+
+  runtime! statusbar.vim
+  runtime! nerdtree_config.vim
+  runtime! nerdcommenter_config.vim
+  runtime! fuzzy_finder_config.vim
+  runtime! search_config.vim
+  runtime! shell.vim
