@@ -1,5 +1,5 @@
-" Vim filetype plugin for running ruby tests
-" Last Change: Apr 19 2009
+" Vim plugin for running ruby tests
+" Last Change: May 13 2009
 " Maintainer: Jan <jan.h.xie@gmail.com>
 " License: MIT License
 
@@ -8,6 +8,9 @@ if exists("rubytest_loaded")
 endif
 let rubytest_loaded = 1
 
+if !exists("g:rubytest_in_quickfix")
+  let g:rubytest_in_quickfix = 1
+endif
 if !exists("g:rubytest_cmd_test")
   let g:rubytest_cmd_test = "ruby %p"
 endif
@@ -18,7 +21,7 @@ if !exists("g:rubytest_cmd_spec")
   let g:rubytest_cmd_spec = "spec -f specdoc %p"
 endif
 if !exists("g:rubytest_cmd_example")
-  let g:rubytest_cmd_example = "spec -f specdoc %p -e '%c'"
+  let g:rubytest_cmd_example = "spec -f specdoc %p -l %c"
 endif
 
 function s:FindCase(patterns)
@@ -27,7 +30,11 @@ function s:FindCase(patterns)
     let line = getline(ln)
     for pattern in keys(a:patterns)
       if line =~ pattern
-        return a:patterns[pattern](line)
+        if s:pattern == '_spec.rb$'
+          return a:patterns[pattern](ln)
+        else
+          return a:patterns[pattern](line)
+        endif
       endif
     endfor
     let ln -= 1
@@ -44,6 +51,7 @@ function s:RunTest()
 
   let case = s:FindCase(s:test_case_patterns['test'])
   if case != 'false'
+    let case = substitute(case, "'\\|\"", '.', 'g')
     let cmd = substitute(cmd, '%c', case, '')
     if @% =~ '^test'
       let cmd = substitute(cmd, '%p', strpart(@%,5), '')
@@ -68,33 +76,25 @@ function s:RunSpec()
   if case != 'false'
     let cmd = substitute(cmd, '%c', case, '')
     let cmd = substitute(cmd, '%p', @%, '')
-    exe "!echo '" . cmd . "' && " . cmd
+    if g:rubytest_in_quickfix > 0
+      let s:oldefm = &efm
+      let &efm = s:efm . s:efm_backtrace . ',' . s:efm_ruby . ',' . s:oldefm . ',%-G%.%#'
+
+      cex system(cmd)
+      cw
+
+      let &efm = s:oldefm
+    else
+      exe "!echo '" . cmd . "' && " . cmd
+    endif
   else
     echo 'No spec found.'
-  end
-endfunction
-
-function s:RunExample()
-  if s:test_scope == 1
-    let cmd = g:rubytest_cmd_test
-  elseif s:test_scope == 2
-    let cmd = g:rubytest_cmd_test
   endif
-
-  let case = s:FindCase(s:test_case_patterns['example'])
-  if case != 'false'
-    let cmd = substitute(cmd, '%c', case, '')
-    let cmd = substitute(cmd, '%p', @%, '')
-    exe "!echo '" . cmd . "' && " . cmd
-  else
-    echo 'No example found.'
-  end
 endfunction
 
 let s:test_patterns = {}
 let s:test_patterns['_test.rb$'] = function('s:RunTest')
 let s:test_patterns['_spec.rb$'] = function('s:RunSpec')
-let s:test_patterns['_example.rb$'] = function('s:RunExample')
 
 function s:GetTestCaseName1(str)
   return split(a:str)[1]
@@ -108,23 +108,31 @@ function s:GetTestCaseName3(str)
   return split(a:str, '"')[1]
 endfunction
 
-function s:GetSpecName1(str)
-  return split(a:str, '"')[1]
+function s:GetTestCaseName4(str)
+  return "test_" . join(split(split(a:str, "'")[1]), '_')
+endfunction
+
+function s:GetTestCaseName5(str)
+  return split(a:str, "'")[1]
+endfunction
+
+function s:GetSpecLine(str)
+  return a:str
 endfunction
 
 let s:test_case_patterns = {}
-let s:test_case_patterns['test'] = {'^\s*def test':function('s:GetTestCaseName1'), '^\s*test \s*"':function('s:GetTestCaseName2'), '^\s*should \s*"':function('s:GetTestCaseName3')}
-let s:test_case_patterns['spec'] = {'^\s*it \s*"':function('s:GetSpecName1')}
-let s:test_case_patterns['example'] = {'^\s*it \s*"':function('s:GetSpecName1')}
+let s:test_case_patterns['test'] = {'^\s*def test':function('s:GetTestCaseName1'), '^\s*test \s*"':function('s:GetTestCaseName2'), "^\\s*test \\s*'":function('s:GetTestCaseName4'), '^\s*should \s*"':function('s:GetTestCaseName3'), "^\\s*should \\s*'":function('s:GetTestCaseName5')}
+let s:test_case_patterns['spec'] = {'^\s*\(it\|example\) \s*':function('s:GetSpecLine')}
+let s:test_case_patterns['example'] = {'^\s*\(it\|example\) \s*':function('s:GetSpecLine')}
 
 let s:save_cpo = &cpo
 set cpo&vim
 
 if !hasmapto('<Plug>RubyTestRun')
-  map <unique> <Leader>rt <Plug>RubyTestRun
+  map <unique> <Leader>t <Plug>RubyTestRun
 endif
 if !hasmapto('<Plug>RubyFileRun')
-  map <unique> <Leader>rT <Plug>RubyFileRun
+  map <unique> <Leader>T <Plug>RubyFileRun
 endif
 
 function s:IsRubyTest()
@@ -138,7 +146,7 @@ endfunction
 
 function s:Run(scope)
   if &filetype != "ruby"
-    echo "This file doens't contain ruby source."
+    echo "This file doesn't contain ruby source."
   elseif !s:IsRubyTest()
     echo "This file doesn't contain ruby test."
   else
@@ -154,5 +162,66 @@ noremap <unique> <script> <Plug>RubyTestRun <SID>Run
 noremap <unique> <script> <Plug>RubyFileRun <SID>RunFile
 noremap <SID>Run :call <SID>Run(1)<CR>
 noremap <SID>RunFile :call <SID>Run(2)<CR>
+
+let s:efm='%A%\\d%\\+)%.%#,'
+
+" below errorformats are copied from rails.vim
+" Current directory
+let s:efm=s:efm . '%D(in\ %f),'
+" Failure and Error headers, start a multiline message
+let s:efm=s:efm
+      \.'%A\ %\\+%\\d%\\+)\ Failure:,'
+      \.'%A\ %\\+%\\d%\\+)\ Error:,'
+      \.'%+A'."'".'%.%#'."'".'\ FAILED,'
+" Exclusions
+let s:efm=s:efm
+      \.'%C%.%#(eval)%.%#,'
+      \.'%C-e:%.%#,'
+      \.'%C%.%#/lib/gems/%\\d.%\\d/gems/%.%#,'
+      \.'%C%.%#/lib/ruby/%\\d.%\\d/%.%#,'
+      \.'%C%.%#/vendor/rails/%.%#,'
+" Specific to template errors
+let s:efm=s:efm
+      \.'%C\ %\\+On\ line\ #%l\ of\ %f,'
+      \.'%CActionView::TemplateError:\ compile\ error,'
+" stack backtrace is in brackets. if multiple lines, it starts on a new line.
+let s:efm=s:efm
+      \.'%Ctest_%.%#(%.%#):%#,'
+      \.'%C%.%#\ [%f:%l]:,'
+      \.'%C\ \ \ \ [%f:%l:%.%#,'
+      \.'%C\ \ \ \ %f:%l:%.%#,'
+      \.'%C\ \ \ \ \ %f:%l:%.%#]:,'
+      \.'%C\ \ \ \ \ %f:%l:%.%#,'
+" Catch all
+let s:efm=s:efm
+      \.'%Z%f:%l:\ %#%m,'
+      \.'%Z%f:%l:,'
+      \.'%C%m,'
+" Syntax errors in the test itself
+let s:efm=s:efm
+      \.'%.%#.rb:%\\d%\\+:in\ `load'."'".':\ %f:%l:\ syntax\ error\\\, %m,'
+      \.'%.%#.rb:%\\d%\\+:in\ `load'."'".':\ %f:%l:\ %m,'
+" And required files
+let s:efm=s:efm
+      \.'%.%#:in\ `require'."'".':in\ `require'."'".':\ %f:%l:\ syntax\ error\\\, %m,'
+      \.'%.%#:in\ `require'."'".':in\ `require'."'".':\ %f:%l:\ %m,'
+" Exclusions
+let s:efm=s:efm
+      \.'%-G%.%#/lib/gems/%\\d.%\\d/gems/%.%#,'
+      \.'%-G%.%#/lib/ruby/%\\d.%\\d/%.%#,'
+      \.'%-G%.%#/vendor/rails/%.%#,'
+      \.'%-G%.%#%\\d%\\d:%\\d%\\d:%\\d%\\d%.%#,'
+" Final catch all for one line errors
+let s:efm=s:efm
+      \.'%-G%\\s%#from\ %.%#,'
+      \.'%f:%l:\ %#%m,'
+
+let s:efm_backtrace='%D(in\ %f),'
+      \.'%\\s%#from\ %f:%l:%m,'
+      \.'%\\s#{RAILS_ROOT}/%f:%l:\ %#%m,'
+      \.'%\\s%#[%f:%l:\ %#%m,'
+      \.'%\\s%#%f:%l:\ %#%m'
+
+let s:efm_ruby='\%-E-e:%.%#,\%+E%f:%l:\ parse\ error,%W%f:%l:\ warning:\ %m,%E%f:%l:in\ %*[^:]:\ %m,%E%f:%l:\ %m,%-C%\tfrom\ %f:%l:in\ %.%#,%-Z%\tfrom\ %f:%l,%-Z%p^'
 
 let &cpo = s:save_cpo

@@ -86,7 +86,6 @@
   command! -nargs=0 RebuildTagsFile call s:RebuildTagsFile()
 
 " Run file with...
-  nmap <leader>sf :Shell script/spec -fn %<CR>
   nmap <leader>st :Shell ruby %<CR>
   
 " Quick, jump out of insert mode while no one is looking
@@ -133,6 +132,10 @@
   vmap <silent> <Leader>i= <ESC>:AlignPush<CR>:AlignCtrl lp1P1<CR>:'<,'>Align =<CR>:AlignPop<CR>
   vmap <silent> <Leader>i, <ESC>:AlignPush<CR>:AlignCtrl lp0P1<CR>:'<,'>Align ,<CR>:AlignPop<CR>
   vmap <silent> <Leader>i( <ESC>:AlignPush<CR>:AlignCtrl lp0P0<CR>:'<,'>Align (<CR>:AlignPop<CR>
+  
+" Remap common rubytest keybindings
+  map <Leader>rt <Plug>RubyTestRun
+  map <Leader>rf <Plug>RubyFileRun
   
   set term=xterm
   colorscheme spicycode
