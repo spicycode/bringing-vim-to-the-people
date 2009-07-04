@@ -138,6 +138,7 @@
   colorscheme spicycode
 
   runtime! statusbar.vim
+  runtime! clojure_config.vim
   runtime! nerdtree_config.vim
   runtime! nerdcommenter_config.vim
   runtime! fuzzy_finder_config.vim
