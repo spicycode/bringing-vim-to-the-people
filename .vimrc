@@ -49,7 +49,7 @@
 
 "folding settings
   set nofoldenable
-  set foldmethod=indent
+  set foldmethod=syntax
   set foldlevel=1
   set foldnestmax=10
 
@@ -139,7 +139,7 @@
   
   set term=xterm
   colorscheme spicycode
-
+  
   runtime! statusbar.vim
   runtime! clojure_config.vim
   runtime! nerdtree_config.vim
