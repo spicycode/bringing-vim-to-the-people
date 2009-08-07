@@ -1,0 +1,83 @@
+*git.txt*	Git Plugin for Vim				*Git* *git*
+
+This plugin provides commands for calling Git functions from Vim as well as
+syntax highlighting for various Git files.
+
+1. Commands		|git-commands|
+2. Key mappingss	|git-keymaps|
+
+==============================================================================
+1. Commands						*git-commands*
+
+If a command has an [args] argument, it is passed to appropriate git command.
+
+							*git-command*
+:Git [args]			Run git [args] in shell and display output.
+
+							*git-add*
+:GitAdd [afile]			Stage changes in [afile] or current file
+				if [afile] is not specified.
+
+							*git-blame*
+:GitBlame			Show what revision and author last modified
+				each line of current file.
+
+							*git-checkout*
+:GitCheckout [args]		Checkout a branch or paths to the working
+				tree.
+
+							*git-commit*
+:GitCommit [args]		Record changes to the repository.  If no files
+				were added to index (either using *:GitAdd* or
+				any other tool) it commits everything like >
+					git-commit -a
+<
+
+							*git-diff*
+:GitDiff [args]			Show changes between commits and working tree.
+
+							*git-log*
+:GitLog [args]			Show commit logs of current file.
+
+							*git-pull*
+:GitPull [args]			Fetch from and merge with another repository
+				or local branch.
+
+							*git-pull-rebase*
+:GitPullRebase			Same as :GitPull with --rebase argument.
+
+							*git-push*
+:GitPush [args]			Update remote refs along with associated
+				objects. Unless specified in [args], it will
+				push to origin/<CURRENT_BRANCH>.
+
+							*git-status*
+:GitStatus			Show working tree status.  You can use keymaps
+				in the newly opened buffer to manipulate files.
+
+				<Enter>	will stage file under cursor
+				-	will remove file from index
+
+							*git-vimdiff-merge*
+:GitVimDiffMerge [args]		Show vimdiff for merge.
+
+							*git-vimdiff-merge-done*
+:GitVimDiffMergeDone		Mark conflicts as resolved and quit diff mode.
+
+==============================================================================
+2. Key mappings						*git-keymaps*
+
+All mappings use <Leader> to avoid conflicts with default commands.  See
+<mapleader> for details.
+
+<Leader>gd		:GitDiff
+<Leader>gD		:GitDiff --cached
+<Leader>gs		:GitStatus
+<Leader>gl		:GitLog
+<Leader>ga		:GitAdd
+<Leader>gA		:GitAdd
+<Leader>gc		:GitCommit
+<Leader>gp		:GitPullRebase
+
+==============================================================================
+ vim:tw=78:ts=8:ft=help:norl:noexpandtab

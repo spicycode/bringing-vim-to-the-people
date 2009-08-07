@@ -26,6 +26,9 @@ nnoremap <Leader>ga :GitAdd<Enter>
 nnoremap <Leader>gA :GitAdd <cfile><Enter>
 nnoremap <Leader>gc :GitCommit<Enter>
 nnoremap <Leader>gp :GitPullRebase<Enter>
+nnoremap <Leader>gg :GitGrep -e '<C-R>=getreg('/')<Enter>'<Enter>
+
+
 
 " Ensure b:git_dir exists.
 function! s:GetGitDir()
@@ -35,24 +38,40 @@ function! s:GetGitDir()
             let b:git_dir = fnamemodify(split(b:git_dir, "\n")[0], ':p') . '/'
         endif
     endif
+    " other scripts may have set this variable, but we expect it to end with a /
+    if b:git_dir[-1:] != '/'
+        let b:git_dir .= '/'
+    endif
     return b:git_dir
 endfunction
 
 " Returns current git branch.
 " Call inside 'statusline' or 'titlestring'.
-function! GitBranch()
+function! GetGitBranch()
     let git_dir = <SID>GetGitDir()
 
-    if strlen(git_dir) && filereadable(git_dir . '/HEAD')
-        let lines = readfile(git_dir . '/HEAD')
+    if strlen(git_dir) && filereadable(git_dir . 'HEAD')
+        let lines = readfile(git_dir . 'HEAD')
         return len(lines) ? matchstr(lines[0], '[^/]*$') : ''
     else
         return ''
     endif
 endfunction
 
-" List all git local branches.
-function! ListGitBranches(arg_lead, cmd_line, cursor_pos)
+
+
+" List all branches.
+function! ListGitBranches()
+    let branches = split(s:SystemGit('branch -a'), '\n')
+    if v:shell_error
+        return []
+    endif
+
+    return map(branches, 'matchstr(v:val, ''^[* ] \zs\S\+\ze'')')
+endfunction
+
+" List all local branches.
+function! ListGitLocalBranches()
     let branches = split(s:SystemGit('branch'), '\n')
     if v:shell_error
         return []
@@ -62,24 +81,28 @@ function! ListGitBranches(arg_lead, cmd_line, cursor_pos)
 endfunction
 
 " List all git commits.
-function! ListGitCommits(arg_lead, cmd_line, cursor_pos)
+function! ListGitCommits()
     let commits = split(s:SystemGit('log --pretty=format:%h'))
     if v:shell_error
         return []
     endif
 
-    let commits = ['HEAD'] + ListGitBranches(a:arg_lead, a:cmd_line, a:cursor_pos) + commits
+    return commits
+endfunction
 
-    if a:cmd_line =~ '^GitDiff'
-        " GitDiff accepts <commit>..<commit>
-        if a:arg_lead =~ '\.\.'
-            let pre = matchstr(a:arg_lead, '.*\.\.\ze')
-            let commits = map(commits, 'pre . v:val')
-        endif
+" List all files, optionally restricted by type
+" 'types' should be string containing zero or more of:
+"  -c --cached     -d --deleted   -i --ignored   -k --killed
+"  -m --modified   -o --others    -u --unmerged
+function! ListGitFiles(types)
+    let files = split(s:SystemGit('ls-files --exclude-standard ' . a:types))
+    if v:shell_error
+        return []
     endif
 
-    return filter(commits, 'match(v:val, ''\v'' . a:arg_lead) == 0')
+    return files
 endfunction
+
 
 " Show diff.
 function! GitDiff(args)
@@ -93,12 +116,42 @@ function! GitDiff(args)
     setlocal filetype=git-diff
 endfunction
 
+function! CompleteGitDiffCmd(arg_lead, cmd_line, cursor_pos)
+    let opts = [ ]
+    if !strlen(a:arg_lead) || a:arg_lead =~ '^-'
+        let opts = [ '-1', '-2', '-3', '-a', '--abbrev', '-B', '-b', '--base',
+                    \ '--binary', '-C', '--cached', '--check', '--color',
+                    \ '--color-words', '--diff-filter', '--dirstat',
+                    \ '--exit-code', '--find-copies-harder', '--full-index',
+                    \ '--ignore-all-space', '--ignore-space-change', '-l', '-M',
+                    \ '--name-only', '--name-status', '--no-color',
+                    \ '--no-renames', '--numstat', '-O', '--ours', '-p',
+                    \ '--patch-with-raw', '--patch-with-stat', '--pickaxe-all',
+                    \ '--pickaxe-regex', '--quiet', '-R', '--raw', '--relative',
+                    \ '-S', '--shortstat', '--stat', '--summary', '--text',
+                    \ '--theirs', '-u', '-w', '-z' ]
+    endif
+    if !strlen(a:arg_lead) || a:arg_lead !~ '^-'
+        let commits = ['HEAD'] + ListGitLocalBranches() + ListGitCommits()
+        if a:arg_lead =~ '\.\.'
+            let pre = matchstr(a:arg_lead, '.*\.\.\ze')
+            let commits = map(commits, 'pre . v:val')
+        endif
+        let opts += commits
+    endif
+    return filter(opts, 'match(v:val, ''\v'' . a:arg_lead) == 0')
+endfunction
+
 " Show Status.
-function! GitStatus()
+function! GitStatus(args)
+    if len(a:args)
+        echoe 'GitStatus ignores arguments'
+    endif
     let git_output = s:SystemGit('status')
     call <SID>OpenGitBuffer(git_output)
     setlocal filetype=git-status
     nnoremap <buffer> <Enter> :GitAdd <cfile><Enter>:call <SID>RefreshGitStatus()<Enter>
+    nnoremap <buffer> d       :GitDiff <cfile><Enter>:call <SID>RefreshGitStatus()<Enter>
     nnoremap <buffer> -       :silent !git reset HEAD -- =expand('<cfile>')<Enter><Enter>:call <SID>RefreshGitStatus()<Enter>
 endfunction
 
@@ -115,11 +168,65 @@ function! GitLog(args)
     setlocal filetype=git-log
 endfunction
 
+" Show Grep.
+function! GitGrep(args)
+	echo 'git grep ' . a:args
+    let git_output = system('git grep -n ' . a:args)
+    if !strlen(git_output)
+	echo "no output from git command"
+	return
+    endif
+
+    call <SID>OpenGitGrepQuickFix(git_output)
+endfunction
+
+
 " Add file to index.
 function! GitAdd(expr)
-    let file = s:Expand(strlen(a:expr) ? a:expr : '%')
+    let args = []
+    let interactive = 0
+    if strlen(a:expr)
+        let lookForOptions = 1
+        for item in s:SplitCmd(a:expr)
+            if lookForOptions && item =~ '^[''"]*-'
+                if item =~ '\v^[''"]*-(i|p|-interactive|-patch)'
+                    let interactive = 1
+                elseif item =~ '^[''"]*--[''"]*$'
+                    let lookForOptions = 0
+                endif
+                let args += [ item ]
+            else
+                let args += [ s:Expand(item) ]
+            endif
+        endfor
+    else
+        let args += [ s:Expand('%') ]
+    endif
 
-    call GitDoCommand('add ' . file)
+    if interactive
+        execute '!' . g:git_bin . ' add ' . join(args)
+    else
+        call GitDoCommand('add ' . join(args))
+    endif
+endfunction
+
+function! CompleteGitAddCmd(arg_lead, cmd_line, cursor_pos)
+    let opts = [ ]
+    let cmd_lead = a:cmd_line[:a:cursor_pos]
+    " stop completing -* flags after '--' and after the first non-flag
+    if cmd_lead !~ ' -- ' && cmd_lead !~ '^\v(\S+\s+){2}.*\<\S'
+        if !strlen(a:arg_lead) || a:arg_lead =~ '^-'
+            let opts += [ '--all', '-A', '--dry-run', '-n', '--force', '-f',
+                        \ '--ignore-errors', '', '--interactive', '-i',
+                        \ '--patch', '-p', '--refresh', '', '--update', '-u',
+                        \ '--verbose', '-v' ]
+        endif
+    endif
+    " if it's not a -* flag, complete filenames
+    if !strlen(a:arg_lead) || a:arg_lead !~ '^-'
+        let opts += ListGitFiles('-c -d -m -o')
+    endif
+    return filter(opts, 'match(v:val, ''\v'' . a:arg_lead) == 0')
 endfunction
 
 " Commit.
@@ -132,24 +239,45 @@ function! GitCommit(args)
         let args .= ' -a'
     endif
 
+    if args !~ '\v\k<!-([mcCF]>|-message=|-reuse-message=|-reedit-message=|-file=)'
+        " no need to ask the user for a message, we have one
+        execute '!' . g:git_bin . ' commit ' . args
+        return
+    endif
+
     " Create COMMIT_EDITMSG file
     let editor_save = $EDITOR
     let $EDITOR = ''
     let git_output = s:SystemGit('commit ' . args)
     let $EDITOR = editor_save
 
+    " signoff already handled, so don't pass through -s/--signoff again
+    let args = substitute(args, '\k\@<!\(-s\|--signoff\)\>', '', 'g')
+
     execute printf('%s %sCOMMIT_EDITMSG', g:git_command_edit, git_dir)
-    setlocal filetype=git-status bufhidden=wipe
+    setlocal filetype=gitcommit bufhidden=wipe
     augroup GitCommit
-        autocmd BufWritePre  <buffer> g/^#\|^\s*$/d | setlocal fileencoding=utf-8
-        execute printf("autocmd BufWritePost <buffer> call GitDoCommand('commit %s -F ' . expand('%%')) | autocmd! GitCommit * <buffer>", args)
+        autocmd BufRead <buffer> setlocal fileencoding=utf-8
+        execute printf("autocmd BufUnload <buffer> call GitDoCommand('commit %s --cleanup=strip -F ' . expand('<afile>')) | autocmd! GitCommit * <buffer>", args)
     augroup END
 endfunction
-
+"
 " Checkout.
 function! GitCheckout(args)
     call GitDoCommand('checkout ' . a:args)
 endfunction
+
+function! CompleteGitCheckoutCmd(arg_lead, cmd_line, cursor_pos)
+    let opts = [ ]
+    if !strlen(a:arg_lead) || a:arg_lead =~ '^-'
+        let opts += [ '-b', '-f', '-l', '-m', '--no-track', '-q', '--track', '-t' ]
+    endif
+    if !strlen(a:arg_lead) || a:arg_lead !~ '^-'
+        let opts += ['HEAD'] + ListGitBranches()
+    endif
+    return filter(opts, 'match(v:val, ''\v'' . a:arg_lead) == 0')
+endfunction
+
 
 " Push.
 function! GitPush(args)
@@ -157,7 +285,7 @@ function! GitPush(args)
     " Wanna see progress...
     let args = a:args
     if args =~ '^\s*$'
-        let args = 'origin ' . GitBranch()
+        let args = 'origin ' . GetGitBranch()
     endif
     execute '!' g:git_bin 'push' args
 endfunction
@@ -243,6 +371,55 @@ function! s:LoadSyntaxRuleFor(params)
     endif
 endfunction
 
+" git command wrapper
+function! Git(args)
+    let words = split(a:args)
+    let name = 'Git' . substitute(words[0], '^.', '\u&', '')
+    if exists('*' . name)
+        let Fn = function(name)
+        return Fn(join(words[1:]))
+    endif
+
+    " fallback to simple handler
+    let git_output = s:SystemGit(a:args)
+    if !strlen(git_output)
+        echo "No output from git command"
+        return
+    endif
+
+    call <SID>OpenGitBuffer(git_output)
+    execute printf('setlocal filetype=git-%s', words[0])
+endfunction
+
+function! CompleteGitCmd(arg_lead, cmd_line, cursor_pos)
+    " don't try to handle completing in the middle for now
+    if a:arg_lead =~ '\s'
+        return [ ]
+    endif
+
+    let words = split(substitute(a:cmd_line, '^ \+', '', ''), '\W\+')
+
+    if words[0] != 'Git'
+        return [ ]
+    endif
+
+    " complete the first word
+    if len(words) < 2 || words[1] == a:arg_lead
+        let commands = split(system("COLUMNS=1 git help -a | awk '/^  / { split($1,x,\" \") ; print $1 }'"))
+        return filter(commands, 'match(v:val, ''\v'' . a:arg_lead) == 0')
+    endif
+
+    let name = 'CompleteGit' . substitute(words[1], '^.', '\u&', '') . 'Cmd'
+    if exists('*' . name)
+        let Fn = function(name)
+        return Fn(a:arg_lead, a:cmd_line, a:cursor_pos)
+    endif
+
+    return [ ]
+endfunction
+
+
+
 function! GitDoCommand(args)
     let git_output = s:SystemGit(a:args)
     let git_output = substitute(git_output, '\n*$', '', '')
@@ -256,7 +433,7 @@ function! GitDoCommand(args)
 endfunction
 
 function! s:SystemGit(args)
-    return system(g:git_bin . ' ' . a:args)
+    return system(g:git_bin . ' ' . a:args . '< /dev/null')
 endfunction
 
 " Show vimdiff for merge. (experimental)
@@ -320,6 +497,19 @@ function! s:OpenGitBuffer(content)
     let b:is_git_msg_buffer = 1
 endfunction
 
+function! s:OpenGitGrepQuickFix(content)
+    let list = []
+
+    for l:line in split(a:content, "\n")
+        let l:parts = matchlist(l:line, '\([^:]\+\):\(\d\+\):\(.*\)')
+        call add(list, { 'filename': l:parts[1], 'lnum': l:parts[2], 'text': l:parts[3] })
+    endfor
+
+    call setqflist(list)
+    crewind
+    copen
+endfunction
+
 function! s:Expand(expr)
     if has('win32')
         return substitute(expand(a:expr), '\', '/', 'g')
@@ -328,17 +518,60 @@ function! s:Expand(expr)
     endif
 endfunction
 
-command! -nargs=1 -complete=customlist,ListGitCommits GitCheckout call GitCheckout(<q-args>)
-command! -nargs=* -complete=customlist,ListGitCommits GitDiff     call GitDiff(<q-args>)
-command!          GitStatus           call GitStatus()
-command! -nargs=? GitAdd              call GitAdd(<q-args>)
+" Takes a string containing a shell command and splits it into a list containing
+" an approximation of the way the line would be parsed by a shell.
+function! s:SplitCmd(cmd)
+    let l:split_cmd = []
+    let cmd = a:cmd
+    let iStart = 0
+    while 1
+        let t = match(cmd, '\S', iStart)
+        if t < iStart
+            break
+        endif
+        let iStart = t
+
+        let iSpace = match(cmd, '\v(\s|$)', iStart)
+        if iSpace < iStart
+            break
+        endif
+
+        let iQuote1 = match(cmd, '\(^["'']\|[^\\]\@<=["'']\)', iStart)
+        if iQuote1 < iStart
+            let iEnd = iSpace - 1
+        else
+            let q = cmd[iQuote1]
+            let iQuote2 = match(cmd, '[^\\]\@<=[' . q . ']', iQuote1 + 1)
+            if iQuote2 < iQuote1
+                throw 'No matching ' . q . ' quote'
+            endif
+            let iEnd = iQuote2
+        endif
+
+        let l:split_cmd += [ cmd[iStart : iEnd] ]
+        
+        let iStart = iEnd + 1
+    endwhile
+
+    return l:split_cmd
+endfunction
+
+command! -nargs=1 -complete=customlist,CompleteGitCheckoutCmd GitCheckout         call GitCheckout(<q-args>)
+command! -nargs=* -complete=customlist,CompleteGitDiffCmd     GitDiff             call GitDiff(<q-args>)
+command! -nargs=*                                             GitStatus           call GitStatus(<q-args>)
+command! -nargs=? -complete=customlist,CompleteGitAddCmd      GitAdd              call GitAdd(<f-args>)
 command! -nargs=* GitLog              call GitLog(<q-args>)
 command! -nargs=* GitCommit           call GitCommit(<q-args>)
 command! -nargs=1 GitCatFile          call GitCatFile(<q-args>)
 command!          GitBlame            call GitBlame()
-command! -nargs=+ Git                 call GitDoCommand(<q-args>)
 command!          GitVimDiffMerge     call GitVimDiffMerge()
 command!          GitVimDiffMergeDone call GitVimDiffMergeDone()
 command! -nargs=* GitPull             call GitPull(<q-args>)
 command!          GitPullRebase       call GitPull('--rebase')
 command! -nargs=* GitPush             call GitPush(<q-args>)
+command! -nargs=* GitGrep             call GitGrep(<q-args>)
+
+command! -nargs=+ -complete=customlist,CompleteGitCmd         Git                 call Git(<q-args>)
+cabbrev git <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'Git' : 'git')<CR>
+
+" vim: set et sw=4 ts=4:

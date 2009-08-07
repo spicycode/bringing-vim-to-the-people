@@ -18,7 +18,6 @@
   
 " Highlight matching parens
   set showmatch
-  "set completeopt=menu,preview
   
 " Use the tab complete menu
   set wildmenu 
@@ -29,7 +28,7 @@
 
 " * Text Formatting -- General
 
-" don't make it look like there are line breaks where there aren't:
+" don't make it look like there are line breaks where there are none
   set nowrap
 
 " use indents of 2 spaces, and have them copied down lines:
@@ -43,8 +42,8 @@
 " Set to auto read when a file is changed from the outside
   set autoread
 
-" enable line numbers
-  set number
+" disable line numbers
+  set nonumber
   set numberwidth=3
 
 "folding settings
@@ -81,7 +80,7 @@
 
   " Add RebuildTagsFile function/command
   function! s:RebuildTagsFile()
-    !ctags -R --exclude=coverage --exclude=files --exclude=public --exclude=log --exclude=tmp --exclude=vendor *
+    silent!ctags -R --exclude=coverage --exclude=files --exclude=public --exclude=log --exclude=tmp --exclude=vendor *
   endfunction
   command! -nargs=0 RebuildTagsFile call s:RebuildTagsFile()
 
@@ -103,7 +102,6 @@
   autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
   autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
   autocmd FileType css set omnifunc=csscomplete#CompleteCSS
-  autocmd FileType c set omnifunc=ccomplete#Complete
   autocmd FileType vim set omnifunc=syntaxcomplete#Complete
 
 " have some fun with bufexplorer
@@ -122,22 +120,11 @@
 " Yank from the cursor to the end of the line, to be consistent with C and D.
   nnoremap Y y$
 
-" Hide search highlighting
-  map <silent> <leader>nh :nohls <CR>
-
-" toggle Quickfix window with <leader>q
-  map <silent> <leader>q :QFix<CR>
-
-" Mappings for align 
-  vmap <silent> <Leader>i= <ESC>:AlignPush<CR>:AlignCtrl lp1P1<CR>:'<,'>Align =<CR>:AlignPop<CR>
-  vmap <silent> <Leader>i, <ESC>:AlignPush<CR>:AlignCtrl lp0P1<CR>:'<,'>Align ,<CR>:AlignPop<CR>
-  vmap <silent> <Leader>i( <ESC>:AlignPush<CR>:AlignCtrl lp0P0<CR>:'<,'>Align (<CR>:AlignPop<CR>
-  
 " Remap common rubytest keybindings
   map <Leader>rt <Plug>RubyTestRun
   map <Leader>rf <Plug>RubyFileRun
   
-  set term=xterm
+  set term=xterm-color
   colorscheme spicycode
   
   runtime! statusbar.vim

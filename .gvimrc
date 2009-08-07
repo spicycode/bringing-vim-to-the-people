@@ -1,5 +1,6 @@
 " GVIM: Color options and general settings
-  colorscheme github256
+  "colorscheme github256
+  colorscheme ir_black
   set guioptions=e
   set guioptions=c
   set guioptions-=T
