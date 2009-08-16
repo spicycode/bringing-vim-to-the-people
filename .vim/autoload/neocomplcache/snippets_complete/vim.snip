@@ -1,0 +1,37 @@
+snippet     if
+abbr        if endif
+prev_word   '^'
+    if ${1:condition}
+        ${2}
+    endif
+
+snippet     ifelse
+abbr        if else endif
+rank        4
+prev_word   '^'
+    if ${1:condition}
+        ${2}
+    else
+        ${3}  
+    endif
+
+snippet     for
+abbr        for in endfor
+prev_word   '^'
+    for ${1:var} in ${2:list}
+        ${3}
+    endfor
+
+snippet     while
+abbr        while endwhile
+prev_word   '^'
+    while ${1:condition}
+        ${2}
+    endwhile
+
+snippet     function
+abbr        func endfunc
+prev_word   '^'
+    function! ${1:func_name}(${2})
+        ${3}
+    endfunction

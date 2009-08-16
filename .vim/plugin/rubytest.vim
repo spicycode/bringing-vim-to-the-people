@@ -123,7 +123,6 @@ endfunction
 let s:test_case_patterns = {}
 let s:test_case_patterns['test'] = {'^\s*def test':function('s:GetTestCaseName1'), '^\s*test \s*"':function('s:GetTestCaseName2'), "^\\s*test \\s*'":function('s:GetTestCaseName4'), '^\s*should \s*"':function('s:GetTestCaseName3'), "^\\s*should \\s*'":function('s:GetTestCaseName5')}
 let s:test_case_patterns['spec'] = {'^\s*\(it\|example\) \s*':function('s:GetSpecLine')}
-let s:test_case_patterns['example'] = {'^\s*\(it\|example\) \s*':function('s:GetSpecLine')}
 
 let s:save_cpo = &cpo
 set cpo&vim
@@ -146,7 +145,7 @@ endfunction
 
 function s:Run(scope)
   if &filetype != "ruby"
-    echo "This file doesn't contain ruby source."
+    echo "This file doens't contain ruby source."
   elseif !s:IsRubyTest()
     echo "This file doesn't contain ruby test."
   else

@@ -1,14 +1,37 @@
-" GVIM: Color options and general settings
-  "colorscheme github256
-  colorscheme ir_black
-  set guioptions=e
-  set guioptions=c
+" fullscreen maximizes vertically AND horizontally
+  set fuoptions=maxvert,maxhorz
+
+" Width of window.
+  set columns=136
+  
+" Height of window.
+  set lines=40
+
+" Don't focus the window when the mouse pointer is moved.
+  set nomousefocus
+
+" Hide mouse pointer on insert mode.
+  set mousehide
+
+" Hide toolbar and menus.
   set guioptions-=T
   set guioptions-=m
 
-" fullscreen maximizes vertically AND horizontally
-  set fuoptions=maxvert,maxhorz
-  
+" Scrollbar is always off.
+  set guioptions-=rL
+
+" Not guitablabel.
+  set guioptions-=e
+
+" Don't highlight search result.
+  set nohlsearch
+
+" Disable bell.
+  set vb t_vb=
+
+" Don't flick cursor.
+  set guicursor=a:blinkon0
+
 " TABS: safari style tab navigation
   nmap <D-[> :tabprevious<CR>
   nmap <D-]> :tabnext<CR>
@@ -32,19 +55,15 @@
   nmap <D-]> >>
   vmap <D-]> >>
   imap <D-]> <C-O>>>
- 
+
 " bind command-[ to shift left
   nmap <D-[> <<
   vmap <D-[> <<
   imap <D-[> <C-O><<
-
-  set lines=40
-  set columns=136
   
-
 " bind command-option-l to toggle line numbers
   nmap <silent> <D-M-l> :set invnumber<CR>
- 
+
 " Unmap Apple+T so we can...
   macmenu &File.New\ Tab key=<nop>
 
@@ -58,4 +77,5 @@
   nnoremap <D-T> :FuzzyFinderTag!<CR> 
 
 " Run file in shell mode with ruby
-  nnoremap <D-r> :Shell ruby %<cr>
+  nnoremap <D-r> <Plug>RubyFileRun
+  map <D-r> <Plug>RubyFileRun 

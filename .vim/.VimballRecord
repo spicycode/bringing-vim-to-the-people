@@ -1,2 +1,0 @@
-tComment.vba: call delete('/Users/chad/.vim/doc/tComment.txt')|call delete('/Users/chad/.vim/plugin/tComment.vim')|call delete('/Users/chad/.vim/autoload/tcomment.vim')
-Align.vba: call delete('/Users/chad/.vim/plugin/AlignPlugin.vim')|call delete('/Users/chad/.vim/plugin/AlignMapsPlugin.vim')|call delete('/Users/chad/.vim/plugin/cecutil.vim')|call delete('/Users/chad/.vim/doc/Align.txt')|call delete('/Users/chad/.vim/autoload/Align.vim')|call delete('/Users/chad/.vim/autoload/AlignMaps.vim')
