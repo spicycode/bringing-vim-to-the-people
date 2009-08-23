@@ -2,7 +2,7 @@
 " FILE: vimshell.vim
 " AUTHOR: Janakiraman .S <prince@india.ti.com>(Original)
 "         Shougo Matsushita <Shougo.Matsu@gmail.com>(Modified)
-" Last Modified: 06 Aug 2009
+" Last Modified: 15 Aug 2009
 " License: MIT license  {{{
 "     Permission is hereby granted, free of charge, to any person obtaining
 "     a copy of this software and associated documentation files (the
@@ -23,12 +23,26 @@
 "     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 "     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 " }}}
-" Version: 5.28, for Vim 7.0
+" Version: 5.29, for Vim 7.0
 "-----------------------------------------------------------------------------
 " ChangeLog: "{{{
+"   5.29 :
+"     - Implemented filename expantion.
+"     - Supported neocomplcache omni completion.
+"     - Improved block expantion.
+"     - Improved highlight of escape sequence.
+"     - Create g:VimShell_HistoryPath directory if not exists.
+"
 "   5.28 :
 "     - Fixed tail space bug(Thanks Nico).
 "     - Fixed prompt history bug(Thanks Nico).
+"     - Supported escape sequence in cd.
+"     - Print all error.
+"     - Improved error print format.
+"     - Optimized print.
+"     - Implemented user prompt.
+"     - Implemented exclude wildcard.
+"     - Implemented global alias.
 "
 "   5.27 :
 "     - Fixed parse error.
@@ -397,6 +411,10 @@ if !exists('g:VimShell_HistoryPath')
     else
         let g:VimShell_HistoryPath = $HOME.'/.vimshell_hist'
     endif
+
+    if !isdirectory(fnamemodify(g:VimShell_HistoryPath, ':p:h'))
+        call mkdir(fnamemodify(g:VimShell_HistoryPath, ':p:h'), 'p')
+    endif
 endif
 if !exists('g:VimShell_HistoryMaxSize')
     let g:VimShell_HistoryMaxSize = 1000
@@ -406,6 +424,10 @@ if !exists('g:VimShell_VimshrcPath')
         let g:VimShell_VimshrcPath = $HOME.'\.vimshrc'
     else
         let g:VimShell_VimshrcPath = $HOME.'/.vimshrc'
+    endif
+
+    if !isdirectory(fnamemodify(g:VimShell_VimshrcPath, ':p:h'))
+        call mkdir(fnamemodify(g:VimShell_VimshrcPath, ':p:h'), 'p')
     endif
 endif
 if !exists('g:VimShell_IgnoreCase')
