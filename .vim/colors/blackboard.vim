@@ -2,9 +2,9 @@
 "
 " Name:         blackboard.vim
 " Maintainer:   Ben Wyrosdick <ben.wyrosdick@gmail.com> 
-" Last Change:  2 July 2008
+" Last Change:  20 August 2009
 " License:      public domain
-" Version:      1.1
+" Version:      1.4
 
 set background=dark
 hi clear
@@ -20,7 +20,8 @@ if has("gui_running")
   highlight Cursor guifg=Black   guibg=Yellow
   highlight CursorLine guibg=#191E2F
   highlight LineNr guibg=#323232 guifg=#888888
-  highlight Folded guifg=White
+  highlight Folded guifg=#f1f3e8 guibg=#444444
+  highlight Pmenu guibg=#84A7C1
 
   "General Colors
   highlight Comment guifg=#AEAEAE
@@ -32,7 +33,12 @@ if has("gui_running")
   highlight Function guifg=#FF5600 gui=NONE
   highlight clear Search
   highlight Search guibg=#1C3B79
-  highlight PreProc guifg=Grey
+  highlight PreProc guifg=#FF5600
+
+  "HTML Colors
+  highlight link htmlTag Type
+  highlight link htmlEndTag htmlTag
+  highlight link htmlTagName htmlTag
 
   "Ruby Colors
   highlight link rubyClass Keyword
