@@ -64,8 +64,8 @@
 " Set to auto read when a file is changed from the outside
   set autoread
 
-" disable line numbers
-  set nonumber
+" line numbers
+  set number
   set numberwidth=3
   
 " Make backspace work in insert mode
