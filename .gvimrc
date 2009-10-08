@@ -79,6 +79,7 @@
 " Unmap Apple+S to remap to Esc, then :w<CR>
   macmenu &File.Save key=<nop>
   imap <D-s> <Esc>:w<CR>
+  map <D-s> <nop>
   
 " Run file in shell mode with ruby
   nnoremap <D-r> <Plug>RubyFileRun
