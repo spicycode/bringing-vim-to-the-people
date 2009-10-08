@@ -95,6 +95,9 @@
 " Yank from the cursor to the end of the line, to be consistent with C and D.
   nnoremap Y y$
   
+" Let syntastic open the error list
+  let g:syntastic_auto_loc_list=1
+
 " Enable gorilla for the lisp on the jvm
   let clj_want_gorilla = 1
 
