@@ -2,11 +2,9 @@
 
   scriptencoding utf-8
   
-  colorscheme ir_black
+  " colorscheme ir_black
+  colorscheme github256
 
-" Title: no title for me
-  set notitle
-  
 " Use zsh.
   set shell=zsh  
 
@@ -16,8 +14,9 @@
 " Explicitly set 256 color support
   set t_Co=256
 
-" Change <Leader>
+" Change <Leader> and <LocalLeader>
   let mapleader = ","
+  let maplocalleader = ","
 
 " Set temporary directory (don't litter local dir with swp/tmp files)
   set directory=/tmp/
@@ -95,6 +94,9 @@
   
 " Yank from the cursor to the end of the line, to be consistent with C and D.
   nnoremap Y y$
+  
+" Enable gorilla for the lisp on the jvm
+  let clj_want_gorilla = 1
 
 " * Load external config
 " runtime! statusbar_config.vim

@@ -1,3 +1,6 @@
+" Set the guifont
+  set guifont=Inconsolata:h14
+
 " fullscreen maximizes vertically AND horizontally
   set fuoptions=maxvert,maxhorz
 
@@ -20,8 +23,8 @@
 " Scrollbar is always off.
   set guioptions-=rL
 
-" Not guitablabel.
-  set guioptions-=e
+" Enable gui tab labels
+  set guioptions+=e
 
 " Don't highlight search result.
   set nohlsearch
@@ -61,9 +64,6 @@
   vmap <D-[> <<
   imap <D-[> <C-O><<
   
-" bind command-option-l to toggle line numbers
-  nmap <silent> <D-M-l> :set invnumber<CR>
-
 " Unmap Apple+T so we can...
   macmenu &File.New\ Tab key=<nop>
 
@@ -76,6 +76,10 @@
 " Change Apple+Shift+T to TextMate Like Fuzzy Finder
   nnoremap <D-T> :FuzzyFinderTag!<CR> 
 
+" Unmap Apple+S to remap to Esc, then :w<CR>
+  macmenu &File.Save key=<nop>
+  imap <D-s> <Esc>:w<CR>
+  
 " Run file in shell mode with ruby
   nnoremap <D-r> <Plug>RubyFileRun
   map <D-r> <Plug>RubyFileRun 
