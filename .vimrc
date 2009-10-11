@@ -99,11 +99,12 @@
   let g:syntastic_auto_loc_list=1
 
 " * Load external config
-" runtime! statusbar_config.vim
-  runtime! clojure_config.vim
-  runtime! vimshell_config.vim
-  runtime! taglist_config.vim
-  runtime! search_config.vim
-  runtime! nerdcommenter_config.vim
-  runtime! nerdtree_config.vim
-  runtime! fuzzy_finder_config.vim
+" runtime! custom/statusbar_config.vim
+  runtime! custom/ruby_config.vim
+  runtime! custom/clojure_config.vim
+  runtime! custom/vimshell_config.vim
+  runtime! custom/taglist_config.vim
+  runtime! custom/search_config.vim
+  runtime! custom/nerdcommenter_config.vim
+  runtime! custom/nerdtree_config.vim
+  runtime! custom/fuzzy_finder_config.vim
