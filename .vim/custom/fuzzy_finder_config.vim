@@ -1,9 +1,21 @@
-" Fuzzy find files in project a la TextMate
-  let g:fuzzy_ignore = "*.png;*.PNG;*.JPG;*.jpg;*.GIF;*.gif;files/**;vendor/**;coverage/**;tmp/**,public/image/**"
-  let g:fuzzy_enumerating_limit = 20
-  let g:fuzzy_path_display = 'relative_path'
-  let g:fuzzy_ceiling = 5000
+" Only show the XX best matches to keep speed up
+  let g:fuf_enumeratingLimit = 50
 
-" Use FuzzyFinder to replace built-in tag navigation :tag and <C-]>:
-  nnoremap <silent> <C-f><C-t> :FuzzyFinderTag!<CR>
-  nnoremap <silent> <C-]>      :FuzzyFinderTag! <C-r>=expand('<cword>')<CR><CR>
+" Ignore case when searching
+  let g:fuf_ignoreCase = 1
+
+" Buffers:
+
+" Order buffers in MRU order
+  let g:fuf_buffer_mruOrder = 1
+
+" Files:
+
+" Ignore these extensions
+  let g:fuf_file_exclude = "\.png$|\.jpg$|\.gif$|vendor|coverage|tmp"
+
+" Never switch to Tagged File mode
+  let g:fuf_taggedfile_switchOrder = -1
+
+" Use fuzzy finder tag lookup instead of builtin one
+  noremap <silent> <C-]> :FufTagWithCursorWord!<CR>

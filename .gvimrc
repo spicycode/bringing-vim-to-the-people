@@ -68,13 +68,13 @@
   macmenu &File.New\ Tab key=<nop>
 
 " Change Apple+T to TextMate Like Fuzzy Finder
-  nnoremap <D-t> :FuzzyFinderTextMate<CR> 
+  nnoremap <D-t> :FufFile<CR> 
 
 " Unmap Apple+Shift+T so we can...
   macmenu &File.Open\ Tab\.\.\. key=<nop>
 
 " Change Apple+Shift+T to TextMate Like Fuzzy Finder
-  nnoremap <D-T> :FuzzyFinderTag!<CR> 
+  nnoremap <D-T> :FufTag<CR> 
 
 " Unmap Apple+S to remap to Esc, then :w<CR>
   macmenu &File.Save key=<nop>
