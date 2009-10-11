@@ -98,11 +98,9 @@
 " Let syntastic open the error list
   let g:syntastic_auto_loc_list=1
 
-" Enable gorilla for the lisp on the jvm
-  let clj_want_gorilla = 1
-
 " * Load external config
 " runtime! statusbar_config.vim
+  runtime! clojure_config.vim
   runtime! vimshell_config.vim
   runtime! taglist_config.vim
   runtime! search_config.vim
