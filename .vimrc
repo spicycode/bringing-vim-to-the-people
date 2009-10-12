@@ -30,7 +30,7 @@
   
 " Use the tab complete menu
   set wildmenu 
-  set wildmode=list:longest,full
+  set wildmode=longest,list
   
 " Disable bell.
   set vb t_vb=
@@ -41,9 +41,6 @@
 " Enable error files & error jumping.
   set cf  
   
-" Yanks go on clipboard instead.
-  set clipboard+=unnamed
-
 " Writes on make/shell commands
   set autowrite  
   
@@ -98,6 +95,12 @@
 " Let syntastic open the error list
   let g:syntastic_auto_loc_list=1
 
+" Add RebuildTagsFile function/command
+  function! s:RebuildTagsFile()
+    !ctags -R --exclude=coverage --exclude=files --exclude=public --exclude=log --exclude=tmp --exclude=vendor *
+  endfunction
+  command! -nargs=0 RebuildTagsFile call s:RebuildTagsFile()
+  
 " * Load external config
 " runtime! custom/statusbar_config.vim
   runtime! custom/ruby_and_rails_config.vim
