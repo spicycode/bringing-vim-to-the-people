@@ -2,8 +2,7 @@
 
   scriptencoding utf-8
   
-  " colorscheme ir_black
-  colorscheme github256
+  colorscheme spicycodegui
 
 " Use zsh.
   set shell=zsh  
@@ -30,7 +29,7 @@
   
 " Use the tab complete menu
   set wildmenu 
-  set wildmode=longest,list
+  set wildmode=list:longest,full
   
 " Disable bell.
   set vb t_vb=
@@ -93,7 +92,7 @@
   nnoremap Y y$
   
 " Let syntastic open the error list
-  let g:syntastic_auto_loc_list=1
+  " let g:syntastic_auto_loc_list=1
 
 " Add RebuildTagsFile function/command
   function! s:RebuildTagsFile()
