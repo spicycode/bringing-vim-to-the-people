@@ -2,7 +2,9 @@
 
   scriptencoding utf-8
   
-  colorscheme spicycodegui
+  " colorscheme spicycodegui
+  " colorscheme github256
+  colorscheme ir_black
 
 " Use zsh.
   set shell=zsh  
