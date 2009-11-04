@@ -1,8 +1,8 @@
 " ============================================================================
 " File:        NERD_tree.vim
 " Description: vim global plugin that provides a nice tree explorer
-" Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
-" Last Change: 7 Jun, 2009
+" Maintainer:  Martin Grenfell <martin.grenfell at gmail dot com>
+" Last Change: 9 October, 2009
 " License:     This program is free software. It comes without any warranty,
 "              to the extent permitted by applicable law. You can redistribute
 "              it and/or modify it under the terms of the Do What The Fuck You
@@ -10,7 +10,7 @@
 "              See http://sam.zoy.org/wtfpl/COPYING for more details.
 "
 " ============================================================================
-let s:NERD_tree_version = '3.1.1'
+let s:NERD_tree_version = '4.0.0'
 
 " SECTION: Script init stuff {{{1
 "============================================================
@@ -161,7 +161,7 @@ command! -n=0 -bar NERDTreeMirror call s:initNerdTreeMirror()
 "============================================================
 augroup NERDTree
     "Save the cursor position whenever we close the nerd tree
-    exec "autocmd BufWinLeave *". s:NERDTreeBufName ." call <SID>saveScreenState()"
+    exec "autocmd BufWinLeave ". s:NERDTreeBufName ."* call <SID>saveScreenState()"
     "cache bookmarks when vim loads
     autocmd VimEnter * call s:Bookmark.CacheBookmarks(0)
 
@@ -461,7 +461,6 @@ endfunction
 
 "FUNCTION: KeyMap.Create(options) {{{3
 function! s:KeyMap.Create(options)
-    let newKeyMap = {}
     let newKeyMap = copy(self)
     let newKeyMap.key = a:options['key']
     let newKeyMap.quickhelpText = a:options['quickhelpText']
@@ -1047,7 +1046,6 @@ function! s:TreeFileNode.New(path)
     if a:path.isDirectory
         return s:TreeDirNode.New(a:path)
     else
-        let newTreeNode = {}
         let newTreeNode = copy(self)
         let newTreeNode.path = a:path
         let newTreeNode.parent = {}
@@ -1948,7 +1946,7 @@ endfunction
 function! s:Path.delete()
     if self.isDirectory
 
-        let cmd = g:NERDTreeRemoveDirCmd . self.str('escape': 1})
+        let cmd = g:NERDTreeRemoveDirCmd . self.str({'escape': 1})
         let success = system(cmd)
 
         if v:shell_error != 0
@@ -2270,6 +2268,8 @@ function! s:Path._strForEdit()
         let cwd = tolower(getcwd())
     endif
 
+    let p = escape(p, s:escape_chars)
+
     let cwd = cwd . s:Path.Slash()
 
     "return a relative path if we can
@@ -2552,7 +2552,7 @@ function! s:initNerdTreeMirror()
             return
         endif
 
-        let bufferName = options[keys(options)[choice-1]]
+        let bufferName = options[sort(keys(options))[choice-1]]
     elseif len(keys(options)) ==# 1
         let bufferName = values(options)[0]
     else
@@ -2660,7 +2660,7 @@ function! s:centerView()
     endif
 endfunction
 "FUNCTION: s:closeTree() {{{2
-"Closes the NERD tree window
+"Closes the primary NERD tree window for this tab
 function! s:closeTree()
     if !s:isTreeOpen()
         throw "NERDTree.NoTreeFoundError: no NERDTree is open"
@@ -2671,7 +2671,7 @@ function! s:closeTree()
         close
         call s:exec("wincmd p")
     else
-        :q
+        close
     endif
 endfunction
 
@@ -3353,10 +3353,10 @@ function! s:toggle(dir)
     if s:treeExistsForTab()
         if !s:isTreeOpen()
             call s:createTreeWin()
-            call s:restoreScreenState()
             if !&hidden
                 call s:renderView()
             endif
+            call s:restoreScreenState()
         else
             call s:closeTree()
         endif
@@ -3582,7 +3582,7 @@ function! s:closeTreeWindow()
         exec "buffer " . b:NERDTreePreviousBuf
     else
         if winnr("$") > 1
-            wincmd c
+            call s:closeTree()
         else
             call s:echo("Cannot close last window")
         endif
