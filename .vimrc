@@ -103,7 +103,7 @@
   command! -nargs=0 RebuildTagsFile call s:RebuildTagsFile()
   
 " * Load external config
-" runtime! custom/statusbar_config.vim
+  runtime! custom/statusbar_config.vim
   runtime! custom/ruby_and_rails_config.vim
   runtime! custom/clojure_config.vim
   runtime! custom/vimshell_config.vim
