@@ -25,8 +25,11 @@ syn match   gitcommitBlank	"^[^#].*" contained contains=@Spell
 syn match   gitcommitComment	"^#.*"
 syn match   gitcommitHead	"^\%(#   .*\n\)\+#$" contained transparent
 syn match   gitcommitOnBranch	"\%(^# \)\@<=On branch" contained containedin=gitcommitComment nextgroup=gitcommitBranch skipwhite
-syn match   gitcommitBranch	"\S\+" contained
+syn match   gitcommitOnBranch	"\%(^# \)\@<=Your branch .\{-\} '" contained containedin=gitcommitComment nextgroup=gitcommitBranch skipwhite
+syn match   gitcommitBranch	"[^ \t']\+" contained
+syn match   gitcommitNoBranch	"\%(^# \)\@<=Not currently on any branch." contained containedin=gitcommitComment
 syn match   gitcommitHeader	"\%(^# \)\@<=.*:$"	contained containedin=gitcommitComment
+syn region  gitcommitAuthor	matchgroup=gitCommitHeader start=/\%(^# \)\@<=Author:/ end=/$/ keepend oneline contained containedin=gitcommitComment transparent
 
 syn region  gitcommitUntracked	start=/^# Untracked files:/ end=/^#$\|^#\@!/ contains=gitcommitHeader,gitcommitHead,gitcommitUntrackedFile fold
 syn match   gitcommitUntrackedFile  "\t\@<=.*"	contained
@@ -41,6 +44,10 @@ syn match   gitcommitSelectedFile	".\{-\}\%($\| -> \)\@=" contained nextgroup=gi
 syn match   gitcommitDiscardedArrow	" -> " contained nextgroup=gitcommitDiscardedFile
 syn match   gitcommitSelectedArrow	" -> " contained nextgroup=gitcommitSelectedFile
 
+syn match   gitcommitWarning		"\%^[^#].*: needs merge$" nextgroup=gitcommitWarning skipnl
+syn match   gitcommitWarning		"^[^#].*: needs merge$" nextgroup=gitcommitWarning skipnl contained
+syn match   gitcommitWarning		"^\%(no changes added to commit\|nothing \%(added \)\=to commit\)\>.*\%$"
+
 hi def link gitcommitSummary		Keyword
 hi def link gitcommitComment		Comment
 hi def link gitcommitUntracked		gitcommitComment
@@ -48,6 +55,7 @@ hi def link gitcommitDiscarded		gitcommitComment
 hi def link gitcommitSelected		gitcommitComment
 hi def link gitcommitOnBranch		Comment
 hi def link gitcommitBranch		Special
+hi def link gitcommitNoBranch		gitCommitBranch
 hi def link gitcommitDiscardedType	gitcommitType
 hi def link gitcommitSelectedType	gitcommitType
 hi def link gitcommitType		Type
