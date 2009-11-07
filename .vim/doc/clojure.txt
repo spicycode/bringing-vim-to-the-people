@@ -62,6 +62,13 @@ The clojure syntax highlighting provides several options:
         g:clj_paren_rainbow
                 If it exists and is nonzero, then differing levels of
                 parenthesisation will receive different highlighting.
+
+        g:clj_dynamic_highlighting
+                Uses the dynamic features of VimClojure to dynamically add
+                the symbols of required and used namespaces. The file needs
+                to be correct (ie. w/o syntax errors and on the classpath)
+                for this to work. If this is not the case, that dynamic
+                highlighting is not done.
 <
 The g:clj_paren_rainbow option provides 10 levels of individual colorisation
 for the parentheses. Because of the quantity of colorisation levels, unlike
@@ -202,6 +209,14 @@ Plug name and your setting will override the default mapping.
 <LocalLeader>sr                                 *sr* *StartRepl*
                         Start a new Vim Repl in a fresh buffer. There
                         might be multiple Repls at the same time.
+
+The following key mappings are also supported if the dynamic features are
+turned off.
+
+<LocalLeader>aw                                 *aw* *AddToLispWords*
+                        Add the word under the cursor to the lispwords option
+                        of the bufer. This modifies the way the form is
+                        indented.
 
 Vim Repl
 --------

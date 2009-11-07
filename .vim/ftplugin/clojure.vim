@@ -84,6 +84,9 @@ endif
 
 call vimclojure#InitBuffer()
 
+call vimclojure#MakePlug("n", "AddToLispWords", 'vimclojure#AddToLispWords(expand("<cword>"))')
+call vimclojure#MapPlug("n", "aw", "AddToLispWords")
+
 if exists("b:vimclojure_namespace")
 	call vimclojure#MakePlug("n", "DocLookupWord", 'vimclojure#DocLookup(expand("<cword>"))')
 	call vimclojure#MakePlug("n", "DocLookupInteractive", 'vimclojure#DocLookup(input("Symbol to look up: "))')
