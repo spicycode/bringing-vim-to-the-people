@@ -1,14 +1,14 @@
 " Set the guifont
-  set guifont=Inconsolata:h14
+  set guifont=Panic\ Sans:h13
 
 " fullscreen maximizes vertically AND horizontally
   set fuoptions=maxvert,maxhorz
 
 " Width of window.
-  set columns=136
-  
+  " set columns=136
+
 " Height of window.
-  set lines=40
+  " set lines=40
 
 " Don't focus the window when the mouse pointer is moved.
   set nomousefocus
@@ -63,24 +63,30 @@
   nmap <D-[> <<
   vmap <D-[> <<
   imap <D-[> <C-O><<
-  
+
 " Unmap Apple+T so we can...
   macmenu &File.New\ Tab key=<nop>
 
 " Change Apple+T to TextMate Like Fuzzy Finder
-  nnoremap <D-t> :FuzzyFinderTextMate<CR> 
+  nnoremap <D-t> :FuzzyFinderTextMate<CR>
 
 " Unmap Apple+Shift+T so we can...
   macmenu &File.Open\ Tab\.\.\. key=<nop>
 
 " Change Apple+Shift+T to TextMate Like Fuzzy Finder
-  nnoremap <D-T> :FuzzyFinderTag!<CR> 
+  nnoremap <D-T> :FuzzyFinderTag!<CR>
+
+" Unmap Apple+b so we can...
+  macmenu &Tools.Make key=<nop>
+" Change Apple+b to Emacseque buffer browser
+  map <D-b> :FuzzyFinderBuffer!<CR>
+  imap <D-b> :FuzzyFinderBuffer!<CR>
 
 " Unmap Apple+S to remap to Esc, then :w<CR>
   macmenu &File.Save key=<nop>
   imap <D-s> <Esc>:w<CR>
   map <D-s> :w<CR>
-  
+
 " Run file in shell mode with ruby
   nnoremap <D-r> <Plug>RubyFileRun
-  map <D-r> <Plug>RubyFileRun 
+  map <D-r> <Plug>RubyFileRun
