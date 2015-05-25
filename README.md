@@ -1,4 +1,6 @@
-# Bringing VIM to the People
+# This repo is EOL
+
+Bringing VIM to the People
 
 ## What's included?
 
